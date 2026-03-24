@@ -1,0 +1,15 @@
+# 核心编排
+langgraph
+langchain
+langchain_core
+langchain_openai  # 用于调用 DeepSeek (兼容 OpenAI 协议)
+
+# Web 界面
+streamlit
+
+# 工具集
+tavily-python     # 搜索工具
+python-dotenv     # 读取 .env 配置
+
+# 辅助
+httpx             # 网络请求
