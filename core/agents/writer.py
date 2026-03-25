@@ -13,6 +13,9 @@ def run_writer(state: dict) -> dict:
     trend_data      = state.get("trend_data", "No trend data available")
     video_duration  = state.get("video_duration", "60s (Immersive)")
     target_platform = state.get("target_platform", "TikTok")
+    target_country  = state.get("target_country", "US")
+    distribution_mode = state.get("distribution_mode", "branded_content")
+    product_category = state.get("product_category", "general")
     creativity      = state.get("creativity", 0.7)
 
     # Dynamic target languages: read exactly what user selected, in order
@@ -36,6 +39,9 @@ def run_writer(state: dict) -> dict:
         style_prompt=style_prompt,
         trend_data=trend_data,
         target_platform=target_platform,
+        target_country=target_country,
+        distribution_mode=distribution_mode,
+        product_category=product_category,
         video_duration=video_duration,
         target_languages=target_languages_str,
         language_count=language_count,
@@ -46,6 +52,9 @@ def run_writer(state: dict) -> dict:
 
 **Topic**: {topic}
 **Platform**: {target_platform}
+**Country**: {target_country}
+**Distribution Mode**: {distribution_mode}
+**Product Category**: {product_category}
 **Duration**: {video_duration}
 
 IMPORTANT: You MUST output {language_count} complete versions in EXACT sequence:

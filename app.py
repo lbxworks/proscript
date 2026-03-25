@@ -1,7 +1,9 @@
 # app.py
+import html
 import streamlit as st
 import sqlite3
 import os
+from core.compliance_config import MARKETS, get_region_for_country
 from core.workflow import build_workflow
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'app.db')
@@ -227,6 +229,99 @@ def save_script(user_id, topic, platform, duration, creativity, lang, content):
         if 'conn' in locals():
             conn.close()
 
+
+def format_citation(item: dict) -> str:
+    source_title = item.get("source_title", "Untitled source")
+    country_code = item.get("country_code", "GLOBAL") or "GLOBAL"
+    page_num = item.get("page_num", "") or "N/A"
+    heading_path = item.get("heading_path", "") or "N/A"
+    source_url = item.get("source_url", "") or ""
+    source_link = f" · <a href='{html.escape(source_url)}' target='_blank'>source</a>" if source_url else ""
+    return (
+        f"<span class='citation-chip'>"
+        f"{html.escape(source_title)} · {html.escape(country_code)} · p.{html.escape(str(page_num))} · "
+        f"{html.escape(str(heading_path))}{source_link}</span>"
+    )
+
+
+def render_compliance_review(report: dict, state: dict, t: dict):
+    if not report:
+        return
+
+    overall_status = report.get("overall_status", "needs_revision")
+    overall_risk = report.get("overall_risk", "medium")
+    headline = report.get("headline", "Compliance review")
+    overall_commentary = report.get("overall_commentary", "")
+    closing_note = report.get("closing_note", "")
+    issues = report.get("issues", []) or []
+    evidence_count = state.get("evidence_count", 0)
+
+    summary_html = f"""
+    <div class="compliance-shell">
+        <div class="section-title" style="margin-top: 18px;">{html.escape(t.get("output_compliance_title", "🛡 Compliance Review"))}</div>
+        <div class="compliance-grid">
+            <div class="compliance-card">
+                <div class="metric-label">{html.escape(t.get("compliance_status_label", "Review Status"))}</div>
+                <div class="metric-value">{html.escape(overall_status.replace('_', ' ').title())}</div>
+            </div>
+            <div class="compliance-card">
+                <div class="metric-label">{html.escape(t.get("compliance_risk_label", "Risk Level"))}</div>
+                <div class="metric-value">{html.escape(overall_risk.title())}</div>
+            </div>
+            <div class="compliance-card">
+                <div class="metric-label">{html.escape(t.get("compliance_market_label", "Market Scope"))}</div>
+                <div class="metric-value">{html.escape(str(state.get('target_country', 'GLOBAL')))} / {html.escape(str(state.get('target_platform', 'all')))}</div>
+            </div>
+            <div class="compliance-card">
+                <div class="metric-label">{html.escape(t.get("compliance_evidence_label", "Evidence Blocks"))}</div>
+                <div class="metric-value">{html.escape(str(evidence_count))}</div>
+            </div>
+        </div>
+        <div class="compliance-headline">{html.escape(headline)}</div>
+        <div class="compliance-note">{html.escape(overall_commentary)}</div>
+    </div>
+    """
+    st.markdown(summary_html, unsafe_allow_html=True)
+
+    if not issues:
+        st.info(t.get("compliance_no_issues", "No material issues were flagged in the current review."))
+    else:
+        for index, issue in enumerate(issues, start=1):
+            citations = issue.get("citations", []) or []
+            citation_html = "".join(format_citation(item) for item in citations) or (
+                f"<span class='citation-chip'>{html.escape(t.get('compliance_no_citations', 'No citation available'))}</span>"
+            )
+            issue_html = f"""
+            <div class="issue-card">
+                <div class="issue-topline">
+                    <div class="issue-index">Issue {index}</div>
+                    <div class="risk-pill risk-{html.escape(issue.get('risk_level', 'medium').lower())}">
+                        {html.escape(issue.get('risk_level', 'medium').title())}
+                    </div>
+                </div>
+                <div class="issue-row-label">{html.escape(t.get("compliance_script_excerpt", "Quoted Script"))}</div>
+                <div class="issue-quote">{html.escape(issue.get("excerpt", "No excerpt provided"))}</div>
+                <div class="issue-row-label">{html.escape(t.get("compliance_reason", "Risk Analysis"))}</div>
+                <div class="issue-copy">{html.escape(issue.get("reason", "No reason provided"))}</div>
+                <div class="issue-row-label">{html.escape(t.get("compliance_fix", "Revision Suggestion"))}</div>
+                <div class="issue-copy">{html.escape(issue.get("suggested_fix", "No suggestion provided"))}</div>
+                <div class="issue-row-label">{html.escape(t.get("compliance_citations", "Supporting Citations"))}</div>
+                <div class="citation-wrap">{citation_html}</div>
+            </div>
+            """
+            st.markdown(issue_html, unsafe_allow_html=True)
+
+    if closing_note:
+        st.markdown(
+            f"""
+            <div class="compliance-shell" style="margin-top: 16px;">
+                <div class="issue-row-label">{html.escape(t.get("compliance_closing", "Overall Commentary"))}</div>
+                <div class="compliance-note">{html.escape(closing_note)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
 # =====================================================================
 # 1. PAGE CONFIG & SESSION STATE
 # =====================================================================
@@ -437,6 +532,141 @@ h1, h2, h3, h4 {
     background: rgba(99, 102, 241, 0.06);
 }
 
+.compliance-shell {
+    background: rgba(14, 165, 233, 0.04);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 18px;
+    padding: 22px;
+}
+.compliance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.compliance-card {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 14px;
+    padding: 14px;
+}
+.metric-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94A3B8;
+    margin-bottom: 8px;
+}
+.metric-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: #F8FAFC;
+}
+.compliance-headline {
+    font-size: 24px;
+    font-weight: 800;
+    color: #E0F2FE;
+    margin-bottom: 10px;
+}
+.compliance-note {
+    color: #CBD5E1;
+    line-height: 1.7;
+}
+.issue-card {
+    margin-top: 16px;
+    background: rgba(15, 23, 42, 0.86);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 18px;
+    padding: 20px;
+}
+.issue-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.issue-index {
+    font-size: 14px;
+    font-weight: 700;
+    color: #A5B4FC;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.risk-pill {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.risk-high {
+    background: rgba(239, 68, 68, 0.18);
+    color: #FCA5A5;
+}
+.risk-medium {
+    background: rgba(245, 158, 11, 0.18);
+    color: #FCD34D;
+}
+.risk-low {
+    background: rgba(34, 197, 94, 0.18);
+    color: #86EFAC;
+}
+.issue-row-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7DD3FC;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
+.issue-quote {
+    background: rgba(148, 163, 184, 0.08);
+    border-left: 3px solid rgba(56, 189, 248, 0.75);
+    padding: 12px 14px;
+    border-radius: 0 12px 12px 0;
+    color: #F8FAFC;
+    line-height: 1.7;
+}
+.issue-copy {
+    color: #CBD5E1;
+    line-height: 1.7;
+}
+.citation-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+}
+.citation-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    color: #BAE6FD;
+    font-size: 12px;
+}
+.citation-chip a {
+    color: #E0F2FE;
+    text-decoration: none;
+}
+
+@media (max-width: 1024px) {
+    .compliance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .compliance-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Sidebar styling */
 [data-testid="stSidebar"] {
     background-color: #0a0a0f;
@@ -474,13 +704,75 @@ with st.sidebar:
     st.markdown(t["section_localization"])
     target_languages = st.multiselect(
         t["output_languages"],
-        ["中文 (Chinese)", "English", "Español (Spanish)", "Français (French)", "العربية (Arabic)", "日本語 (Japanese)"],
-        default=["中文 (Chinese)", "English"],
+        [
+            "中文 (Chinese)",
+            "English",
+            "Español (Spanish)",
+            "Português (Portuguese)",
+            "Français (French)",
+            "Deutsch (German)",
+            "العربية (Arabic)",
+            "日本語 (Japanese)",
+        ],
+        default=["English"],
     )
 
     st.markdown(t["section_distribution"])
-    platform_options = [t["plat_tiktok"], t["plat_youtube"], t["plat_instagram"], t["plat_douyin"]]
-    target_platform = st.selectbox(t["target_platform"], platform_options)
+    market_options = [market["code"] for market in MARKETS]
+    market_labels = {
+        market["code"]: f"{market['label']} ({market['code']})"
+        for market in MARKETS
+    }
+    target_country = st.selectbox(
+        t.get("target_market", "Target Market:"),
+        market_options,
+        format_func=lambda code: market_labels[code],
+        index=0,
+    )
+    target_region_pack = get_region_for_country(target_country)
+    st.caption(f"{t.get('target_region_pack', 'Region Pack')}: {target_region_pack}")
+
+    platform_labels = {
+        "tiktok": t["plat_tiktok"],
+        "youtube": t["plat_youtube"],
+        "instagram": t["plat_instagram"],
+        "x": t.get("plat_x", "X / Twitter"),
+        "reddit": t.get("plat_reddit", "Reddit"),
+        "douyin": t["plat_douyin"],
+    }
+    target_platform = st.selectbox(
+        t["target_platform"],
+        list(platform_labels.keys()),
+        format_func=lambda key: platform_labels[key],
+    )
+
+    distribution_labels = {
+        "organic": t.get("mode_organic", "Organic Post"),
+        "branded_content": t.get("mode_branded", "Branded Content"),
+        "paid_ads": t.get("mode_paid", "Paid Ads"),
+    }
+    distribution_mode = st.selectbox(
+        t.get("distribution_mode", "Distribution Mode:"),
+        list(distribution_labels.keys()),
+        format_func=lambda key: distribution_labels[key],
+        index=1,
+    )
+
+    product_labels = {
+        "general": t.get("cat_general", "General Merchandise"),
+        "beauty": t.get("cat_beauty", "Beauty & Personal Care"),
+        "electronics": t.get("cat_electronics", "Electronics"),
+        "fashion": t.get("cat_fashion", "Fashion"),
+        "food_beverage": t.get("cat_food", "Food & Beverage"),
+        "health_supplement": t.get("cat_health", "Health / Supplement"),
+    }
+    product_category = st.selectbox(
+        t.get("product_category", "Product Category:"),
+        list(product_labels.keys()),
+        format_func=lambda key: product_labels[key],
+    )
+
+    brand_id = st.text_input(t.get("brand_id", "Brand ID:"), value="default")
 
     duration_options = [t["dur_15s"], t["dur_30s"], t["dur_60s"], t["dur_3min"]]
     video_duration = st.select_slider(
@@ -522,12 +814,17 @@ if generate_btn:
     else:
         st.markdown("---")
         selected_user_id = user_dict[selected_name][0]
+        final_state = {}
+        compliance_report = None
 
         with st.status(t["status_running"], expanded=True) as status:
             st.write(t["status_profiler"])
             st.write(t["status_trend"])
-            st.write(f"{t['status_writer']}\n   🎯 {t['target_platform']}: {target_platform} | "
+            st.write(f"{t['status_writer']}\n   🎯 {t['target_platform']}: {platform_labels[target_platform]} | "
                      f"{t['video_duration']}: {video_duration}")
+            st.write(t.get("status_scope", ">> 🧭 [Compliance Scope] Resolving platform, market, and language scope..."))
+            st.write(t.get("status_retriever", ">> 📚 [Compliance Retriever] Fetching local policy and brand evidence..."))
+            st.write(t.get("status_reviewer", ">> 🛡️ [Compliance Reviewer] Reviewing script, risks, and revisions..."))
 
             try:
                 app_workflow = build_workflow()
@@ -537,11 +834,17 @@ if generate_btn:
                     "target_languages": target_languages,
                     "video_duration": video_duration,
                     "target_platform": target_platform,
+                    "target_country": target_country,
+                    "target_region_pack": target_region_pack,
+                    "distribution_mode": distribution_mode,
+                    "product_category": product_category,
+                    "brand_id": brand_id,
                     "creativity": creativity,
                 }
 
                 final_state = app_workflow.invoke(initial_state)
                 final_script = final_state.get("final_script", "Script generation failed.")
+                compliance_report = final_state.get("compliance_report")
 
                 status.update(label=t["status_done"], state="complete", expanded=False)
                 
@@ -553,6 +856,7 @@ if generate_btn:
                 status.update(label=t["status_error"], state="error", expanded=True)
                 st.error(f"DEBUG: {e}")
                 final_script = None
+                compliance_report = None
 
         if final_script:
             st.markdown(f"<div class='section-title'>{t['output_title']}</div>", unsafe_allow_html=True)
@@ -560,6 +864,7 @@ if generate_btn:
                 st.markdown("<div class='script-output'>", unsafe_allow_html=True)
                 st.markdown(final_script)
                 st.markdown("</div>", unsafe_allow_html=True)
+            render_compliance_review(compliance_report or {}, final_state, t)
             st.success(t["save_success"])
             st.stop()
 
