@@ -13,8 +13,8 @@ env_path = project_root / '.env'
 # 2. 打印调试信息 (告诉你它在去哪里找文件)
 print(f"🔍 正在尝试加载配置: {env_path}")
 
-# 3. 指定路径加载
-is_loaded = load_dotenv(dotenv_path=env_path)
+# 3. 指定路径加载，并且强制覆盖已有的系统环境变量 (解决旧 Key 残留的问题)
+is_loaded = load_dotenv(dotenv_path=env_path, override=True)
 if not is_loaded:
     print("⚠️ 警告: load_dotenv 返回 False，可能文件不存在或为空！")
 # --- 核心修改结束 ---
