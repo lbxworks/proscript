@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -31,6 +32,28 @@ def _split_front_matter(text: str) -> Tuple[Dict[str, str], str]:
     return metadata, body
 
 
+def _split_json_metadata_block(text: str) -> Tuple[Dict[str, str], str]:
+    match = re.match(r"^\s*```json\s*(\{.*?\})\s*```\s*", text, flags=re.DOTALL)
+    if not match:
+        return {}, text
+
+    try:
+        payload = json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return {}, text
+
+    metadata = {str(key): str(value) for key, value in payload.items()}
+    body = text[match.end():].strip()
+    return metadata, body
+
+
+def _split_metadata(text: str) -> Tuple[Dict[str, str], str]:
+    metadata, body = _split_front_matter(text)
+    if metadata:
+        return metadata, body
+    return _split_json_metadata_block(text)
+
+
 def _tokenize(text: str) -> List[str]:
     return re.findall(r"[^\W_]+", text.lower(), flags=re.UNICODE)
 
@@ -52,18 +75,18 @@ def load_knowledge_base() -> List[Dict[str, object]]:
             continue
 
         raw_text = path.read_text(encoding="utf-8")
-        metadata, body = _split_front_matter(raw_text)
+        metadata, body = _split_metadata(raw_text)
         if not body:
             continue
 
         document = {
-            "doc_id": metadata.get("doc_id", path.stem),
-            "source_title": metadata.get("source_title", path.stem.replace("_", " ").title()),
-            "source_type": metadata.get("source_type", "policy"),
+            "doc_id": metadata.get("doc_id", metadata.get("source_id", path.stem)),
+            "source_title": metadata.get("source_title", metadata.get("title", path.stem.replace("_", " ").title())),
+            "source_type": metadata.get("source_type", metadata.get("document_type", "policy")),
             "source_url": metadata.get("source_url", ""),
             "platform": metadata.get("platform", "").lower(),
             "distribution_mode": metadata.get("distribution_mode", "").lower(),
-            "country_code": metadata.get("country_code", "").upper(),
+            "country_code": metadata.get("country_code", metadata.get("region", "")).upper(),
             "region_pack": metadata.get("region_pack", "").upper(),
             "language": metadata.get("language", "").lower(),
             "brand_id": metadata.get("brand_id", "").lower(),

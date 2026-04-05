@@ -1,0 +1,332 @@
+[
+  {
+    "source_id": "law_ar_publicidad_concursos",
+    "markdown_path": "data/knowledge_base/processed/law_ar_publicidad_concursos.md",
+    "metadata_path": "data/knowledge_base/processed/law_ar_publicidad_concursos.json",
+    "title": "Argentina - Publicidad y concursos",
+    "platform": "all",
+    "region": "AR",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_ar_resolucion_45_2006",
+    "markdown_path": "data/knowledge_base/processed/law_ar_resolucion_45_2006.md",
+    "metadata_path": "data/knowledge_base/processed/law_ar_resolucion_45_2006.json",
+    "title": "Argentina - Resolucion 45/2006 MERCOSUR misleading advertising",
+    "platform": "all",
+    "region": "AR",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_br_anvisa_misleading_ads",
+    "markdown_path": "data/knowledge_base/processed/law_br_anvisa_misleading_ads.md",
+    "metadata_path": "data/knowledge_base/processed/law_br_anvisa_misleading_ads.json",
+    "title": "Brazil ANVISA - Cuidado com a propaganda enganosa",
+    "platform": "all",
+    "region": "BR",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_br_cdc_art_37",
+    "markdown_path": "data/knowledge_base/processed/law_br_cdc_art_37.md",
+    "metadata_path": "data/knowledge_base/processed/law_br_cdc_art_37.json",
+    "title": "Brazil Consumer Code - Misleading Advertising Definition",
+    "platform": "all",
+    "region": "BR",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_br_senacon_social_media_ads",
+    "markdown_path": "data/knowledge_base/processed/law_br_senacon_social_media_ads.md",
+    "metadata_path": "data/knowledge_base/processed/law_br_senacon_social_media_ads.json",
+    "title": "Brazil Senacon - Social Media Ads Must Be Clearly Identified",
+    "platform": "all",
+    "region": "BR",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_ca_influencer_competition",
+    "markdown_path": "data/knowledge_base/processed/law_ca_influencer_competition.md",
+    "metadata_path": "data/knowledge_base/processed/law_ca_influencer_competition.json",
+    "title": "Canada Competition Bureau - Influencer Marketing and the Competition Act",
+    "platform": "all",
+    "region": "CA",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_ca_misleading_marketing",
+    "markdown_path": "data/knowledge_base/processed/law_ca_misleading_marketing.md",
+    "metadata_path": "data/knowledge_base/processed/law_ca_misleading_marketing.json",
+    "title": "Canada Competition Bureau - Misleading Representations and Deceptive Marketing",
+    "platform": "all",
+    "region": "CA",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_de_uwg_html",
+    "markdown_path": "data/knowledge_base/processed/law_de_uwg_html.md",
+    "metadata_path": "data/knowledge_base/processed/law_de_uwg_html.json",
+    "title": "Germany - Act Against Unfair Competition",
+    "platform": "all",
+    "region": "DE",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_de_uwg_pdf",
+    "markdown_path": "data/knowledge_base/processed/law_de_uwg_pdf.md",
+    "metadata_path": "data/knowledge_base/processed/law_de_uwg_pdf.json",
+    "title": "Germany - UWG PDF",
+    "platform": "all",
+    "region": "DE",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_dk_hidden_ads_pdf",
+    "markdown_path": "data/knowledge_base/processed/law_dk_hidden_ads_pdf.md",
+    "metadata_path": "data/knowledge_base/processed/law_dk_hidden_ads_pdf.json",
+    "title": "Denmark Consumer Ombudsman - hidden advertising on social media PDF",
+    "platform": "all",
+    "region": "DK",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_dk_influencer_enforcement",
+    "markdown_path": "data/knowledge_base/processed/law_dk_influencer_enforcement.md",
+    "metadata_path": "data/knowledge_base/processed/law_dk_influencer_enforcement.json",
+    "title": "Denmark Consumer Ombudsman - action against influencers",
+    "platform": "all",
+    "region": "DK",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_es_influencer_pdf",
+    "markdown_path": "data/knowledge_base/processed/law_es_influencer_pdf.md",
+    "metadata_path": "data/knowledge_base/processed/law_es_influencer_pdf.json",
+    "title": "Spain Ministry of Consumer Affairs - sanctions note PDF",
+    "platform": "all",
+    "region": "ES",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_es_influencer_warning",
+    "markdown_path": "data/knowledge_base/processed/law_es_influencer_warning.md",
+    "metadata_path": "data/knowledge_base/processed/law_es_influencer_warning.json",
+    "title": "Spain Ministry of Consumer Affairs - warning to influencers",
+    "platform": "all",
+    "region": "ES",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_eu_influencer_sweep",
+    "markdown_path": "data/knowledge_base/processed/law_eu_influencer_sweep.md",
+    "metadata_path": "data/knowledge_base/processed/law_eu_influencer_sweep.json",
+    "title": "EU - Influencer marketing sweeps",
+    "platform": "all",
+    "region": "EU",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_eu_ucpd_page",
+    "markdown_path": "data/knowledge_base/processed/law_eu_ucpd_page.md",
+    "metadata_path": "data/knowledge_base/processed/law_eu_ucpd_page.json",
+    "title": "EU - Unfair Commercial Practices Directive",
+    "platform": "all",
+    "region": "EU",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_eu_ucpd_pdf",
+    "markdown_path": "data/knowledge_base/processed/law_eu_ucpd_pdf.md",
+    "metadata_path": "data/knowledge_base/processed/law_eu_ucpd_pdf.json",
+    "title": "EU - Unfair Commercial Practices Directive PDF",
+    "platform": "all",
+    "region": "EU",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_fi_influencer_guideline",
+    "markdown_path": "data/knowledge_base/processed/law_fi_influencer_guideline.md",
+    "metadata_path": "data/knowledge_base/processed/law_fi_influencer_guideline.json",
+    "title": "Finland Consumer Ombudsman - Labeling influencer marketing",
+    "platform": "all",
+    "region": "FI",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_it_agcm_influencer_2025",
+    "markdown_path": "data/knowledge_base/processed/law_it_agcm_influencer_2025.md",
+    "metadata_path": "data/knowledge_base/processed/law_it_agcm_influencer_2025.json",
+    "title": "Italy AGCM - influencer marketing sanctions 2025",
+    "platform": "all",
+    "region": "IT",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_it_agcm_meta_case",
+    "markdown_path": "data/knowledge_base/processed/law_it_agcm_meta_case.md",
+    "metadata_path": "data/knowledge_base/processed/law_it_agcm_meta_case.json",
+    "title": "Italy AGCM - Meta Instagram influencer case",
+    "platform": "instagram",
+    "region": "IT",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_mx_profeco_publicidad_enganosa",
+    "markdown_path": "data/knowledge_base/processed/law_mx_profeco_publicidad_enganosa.md",
+    "metadata_path": "data/knowledge_base/processed/law_mx_profeco_publicidad_enganosa.json",
+    "title": "Mexico PROFECO - Publicidad Enganosa",
+    "platform": "all",
+    "region": "MX",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_sa_product_safety_manual",
+    "markdown_path": "data/knowledge_base/processed/law_sa_product_safety_manual.md",
+    "metadata_path": "data/knowledge_base/processed/law_sa_product_safety_manual.json",
+    "title": "Saudi Product Safety System Guidance Manual",
+    "platform": "all",
+    "region": "SA",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_uk_asa_influencer_guide",
+    "markdown_path": "data/knowledge_base/processed/law_uk_asa_influencer_guide.md",
+    "metadata_path": "data/knowledge_base/processed/law_uk_asa_influencer_guide.json",
+    "title": "UK ASA - Influencers guide to making clear that ads are ads",
+    "platform": "all",
+    "region": "UK",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "law_uk_asa_pdf",
+    "markdown_path": "data/knowledge_base/processed/law_uk_asa_pdf.md",
+    "metadata_path": "data/knowledge_base/processed/law_uk_asa_pdf.json",
+    "title": "UK ASA - Influencers guide PDF",
+    "platform": "all",
+    "region": "UK",
+    "document_type": "market_law",
+    "raw_suffix": ".pdf"
+  },
+  {
+    "source_id": "law_uk_asa_resources",
+    "markdown_path": "data/knowledge_base/processed/law_uk_asa_resources.md",
+    "metadata_path": "data/knowledge_base/processed/law_uk_asa_resources.json",
+    "title": "UK ASA - Influencer Marketing Key Advice Resources",
+    "platform": "all",
+    "region": "UK",
+    "document_type": "market_law",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_discord_policy_hub",
+    "markdown_path": "data/knowledge_base/processed/platform_discord_policy_hub.md",
+    "metadata_path": "data/knowledge_base/processed/platform_discord_policy_hub.json",
+    "title": "Discord Policy Hub",
+    "platform": "discord",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_reddit_content_policy",
+    "markdown_path": "data/knowledge_base/processed/platform_reddit_content_policy.md",
+    "metadata_path": "data/knowledge_base/processed/platform_reddit_content_policy.json",
+    "title": "Reddit Content Policy",
+    "platform": "reddit",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_tiktok_ads_policy",
+    "markdown_path": "data/knowledge_base/processed/platform_tiktok_ads_policy.md",
+    "metadata_path": "data/knowledge_base/processed/platform_tiktok_ads_policy.json",
+    "title": "TikTok Advertising Policies - Other Products and Services",
+    "platform": "tiktok",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_tiktok_branded_content",
+    "markdown_path": "data/knowledge_base/processed/platform_tiktok_branded_content.md",
+    "metadata_path": "data/knowledge_base/processed/platform_tiktok_branded_content.json",
+    "title": "TikTok Branded Content Policy",
+    "platform": "tiktok",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_x_ads_overview",
+    "markdown_path": "data/knowledge_base/processed/platform_x_ads_overview.md",
+    "metadata_path": "data/knowledge_base/processed/platform_x_ads_overview.json",
+    "title": "X Ads Policies Overview",
+    "platform": "x",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_x_brand_safety",
+    "markdown_path": "data/knowledge_base/processed/platform_x_brand_safety.md",
+    "metadata_path": "data/knowledge_base/processed/platform_x_brand_safety.json",
+    "title": "X Brand Safety Policy",
+    "platform": "x",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "platform_x_quality_policy",
+    "markdown_path": "data/knowledge_base/processed/platform_x_quality_policy.md",
+    "metadata_path": "data/knowledge_base/processed/platform_x_quality_policy.json",
+    "title": "X Quality Policy",
+    "platform": "x",
+    "region": "GLOBAL",
+    "document_type": "platform_policy",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "tech_ragflow_docs_repo",
+    "markdown_path": "data/knowledge_base/processed/tech_ragflow_docs_repo.md",
+    "metadata_path": "data/knowledge_base/processed/tech_ragflow_docs_repo.json",
+    "title": "RAGFlow Docs Repository",
+    "platform": "ragflow",
+    "region": "GLOBAL",
+    "document_type": "technical_reference",
+    "raw_suffix": ".html"
+  },
+  {
+    "source_id": "tech_ragflow_readme",
+    "markdown_path": "data/knowledge_base/processed/tech_ragflow_readme.md",
+    "metadata_path": "data/knowledge_base/processed/tech_ragflow_readme.json",
+    "title": "RAGFlow GitHub README",
+    "platform": "ragflow",
+    "region": "GLOBAL",
+    "document_type": "technical_reference",
+    "raw_suffix": ".html"
+  }
+]
