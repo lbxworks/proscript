@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Official consumer education material on misleading advertising.",
   "raw_file": "data/knowledge_base/raw/law_mx_profeco_publicidad_enganosa.pdf",
-  "processed_at": "2026-04-05T07:17:09.579585+00:00",
+  "processed_at": "2026-04-06T06:55:14.906315+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_mx_profeco_publicidad_enganosa",
   "source_title": "Mexico PROFECO - Publicidad Enganosa",

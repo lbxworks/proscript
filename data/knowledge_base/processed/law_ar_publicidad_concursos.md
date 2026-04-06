@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Official FAQ on deceptive advertising and contests.",
   "raw_file": "data/knowledge_base/raw/law_ar_publicidad_concursos.html",
-  "processed_at": "2026-04-05T07:16:50.764114+00:00",
+  "processed_at": "2026-04-06T06:54:57.384998+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_ar_publicidad_concursos",
   "source_title": "Argentina - Publicidad y concursos",

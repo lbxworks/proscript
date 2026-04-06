@@ -38,4 +38,7 @@ def run_compliance_scope_resolver(state: dict) -> dict:
         "knowledge_languages": knowledge_languages,
     }
 
-    return resolved_scope
+    return {
+        **resolved_scope,
+        "compliance_scope": resolved_scope,
+    }

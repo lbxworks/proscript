@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Enforcement example and marketing law applicability.",
   "raw_file": "data/knowledge_base/raw/law_dk_influencer_enforcement.html",
-  "processed_at": "2026-04-05T07:16:52.793816+00:00",
+  "processed_at": "2026-04-06T06:54:59.263974+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_dk_influencer_enforcement",
   "source_title": "Denmark Consumer Ombudsman - action against influencers",

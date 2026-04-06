@@ -5,6 +5,12 @@ import re
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from core.compliance_store import (
+    ensure_qdrant_index,
+    get_index_status,
+    initialize_runtime,
+    retrieve_evidence as retrieve_qdrant_evidence,
+)
 
 KB_ROOT = Path(__file__).resolve().parent.parent / "data" / "knowledge_base"
 SUPPORTED_SUFFIXES = {".md", ".txt", ".markdown"}
@@ -173,48 +179,69 @@ def _score_document(document: Dict[str, object], query_tokens: set, scope: Dict[
 
 
 def retrieve_evidence(query_text: str, scope: Dict[str, object], limit: int = 6) -> List[Dict[str, object]]:
-    documents = load_knowledge_base()
-    if not documents:
-        return []
+    return retrieve_qdrant_evidence(query_text=query_text, scope=scope, limit=limit)
 
-    query_tokens = set(_tokenize(query_text))
-    if not query_tokens:
-        query_tokens = set(_tokenize(str(scope)))
 
-    scored_documents: List[Tuple[int, Dict[str, object]]] = []
-    for document in documents:
-        if not _is_scope_match(document, scope):
-            continue
-        score = _score_document(document, query_tokens, scope)
-        if score <= 0:
-            continue
-        scored_documents.append((score, document))
+def build_knowledge_index(
+    force_rebuild: bool = False,
+    progress_callback=None,
+) -> Dict[str, object]:
+    return ensure_qdrant_index(force_rebuild=force_rebuild, progress_callback=progress_callback)
 
-    scored_documents.sort(key=lambda item: item[0], reverse=True)
 
-    evidence: List[Dict[str, object]] = []
-    for score, document in scored_documents[:limit]:
-        evidence.append(
-            {
-                "doc_id": document["doc_id"],
-                "source_title": document["source_title"],
-                "source_type": document["source_type"],
-                "source_url": document["source_url"],
-                "platform": document["platform"],
-                "distribution_mode": document["distribution_mode"],
-                "country_code": document["country_code"],
-                "region_pack": document["region_pack"],
-                "language": document["language"],
-                "effective_from": document["effective_from"],
-                "effective_to": document["effective_to"],
-                "page_num": document["page_num"],
-                "heading_path": document["heading_path"],
-                "block_id": document["block_id"],
-                "is_global_fallback": document["is_global_fallback"],
-                "excerpt": str(document["body"])[:900],
-                "path": document["path"],
-                "score": score,
-            }
+def get_knowledge_index_status() -> Dict[str, object]:
+    return get_index_status()
+
+
+def initialize_knowledge_runtime(
+    progress_callback=None,
+    force_rebuild: bool = False,
+) -> Dict[str, object]:
+    return initialize_runtime(progress_callback=progress_callback, force_rebuild=force_rebuild)
+
+
+def rebuild_knowledge_runtime(progress_callback=None) -> Dict[str, object]:
+    return initialize_runtime(progress_callback=progress_callback, force_rebuild=True)
+
+
+def normalize_raw_knowledge_files(progress_callback=None) -> Dict[str, object]:
+    from scripts.normalize_rag_raw_docs import (
+        MANIFEST_PATH,
+        OUTPUT_DIR,
+        RAW_DIR,
+        load_catalog_map,
+        process_raw_document,
+    )
+
+    catalog_map = load_catalog_map()
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    raw_files = [
+        path
+        for path in sorted(RAW_DIR.glob("*"))
+        if path.is_file() and path.suffix.lower() in {".html", ".pdf"}
+    ]
+
+    if progress_callback is not None:
+        progress_callback(
+            "normalize_scan",
+            f"Scanning {len(raw_files)} raw compliance documents...",
+            0.02,
         )
 
-    return evidence
+    manifest: List[Dict[str, object]] = []
+    total_files = max(len(raw_files), 1)
+    for index, raw_path in enumerate(raw_files, start=1):
+        if progress_callback is not None:
+            progress_callback(
+                "normalize_file",
+                f"Normalizing raw file {index}/{total_files}: {raw_path.name}",
+                0.04 + index / total_files * 0.14,
+            )
+        manifest.append(process_raw_document(raw_path, catalog_map))
+
+    MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {
+        "raw_files": len(raw_files),
+        "processed_documents": len(manifest),
+        "manifest_path": str(MANIFEST_PATH),
+    }

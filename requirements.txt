@@ -10,6 +10,8 @@ streamlit
 # 工具集
 tavily-python     # 搜索工具
 python-dotenv     # 读取 .env 配置
+qdrant-client[fastembed]  # 本地向量索引与免费 embedding
 
 # 辅助
 httpx             # 网络请求
+filelock          # 启动初始化文件锁

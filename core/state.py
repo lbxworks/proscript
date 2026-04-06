@@ -22,9 +22,14 @@ class GraphState(TypedDict):
     style_prompt: Optional[str]   
     few_shot: Optional[str]       
     trend_data: Optional[str]     
+    trend_query: Optional[str]
+    trend_sources: Optional[List[Dict[str, Any]]]
+    compliance_scope: Optional[Dict[str, Any]]
     knowledge_languages: Optional[List[str]]
     retrieved_evidence: Optional[List[Dict[str, Any]]]
     evidence_count: Optional[int]
+    retrieval_debug: Optional[Dict[str, Any]]
+    rule_issues: Optional[List[Dict[str, Any]]]
     compliance_report: Optional[Dict[str, Any]]
     
     # --- 输出信息 ---

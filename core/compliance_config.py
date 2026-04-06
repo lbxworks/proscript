@@ -5,12 +5,20 @@ from typing import Dict, List, Optional
 
 MARKETS: List[Dict[str, str]] = [
     {"code": "US", "label": "United States", "region": "AMER", "default_language": "en"},
+    {"code": "CA", "label": "Canada", "region": "AMER", "default_language": "en"},
     {"code": "MX", "label": "Mexico", "region": "LATAM", "default_language": "es"},
     {"code": "BR", "label": "Brazil", "region": "LATAM", "default_language": "pt-BR"},
+    {"code": "AR", "label": "Argentina", "region": "LATAM", "default_language": "es"},
     {"code": "GB", "label": "United Kingdom", "region": "EU", "default_language": "en"},
     {"code": "ES", "label": "Spain", "region": "EU", "default_language": "es"},
     {"code": "DE", "label": "Germany", "region": "EU", "default_language": "de"},
     {"code": "FR", "label": "France", "region": "EU", "default_language": "fr"},
+    {"code": "IT", "label": "Italy", "region": "EU", "default_language": "it"},
+    {"code": "PT", "label": "Portugal", "region": "EU", "default_language": "pt-PT"},
+    {"code": "DK", "label": "Denmark", "region": "EU", "default_language": "da"},
+    {"code": "FI", "label": "Finland", "region": "EU", "default_language": "fi"},
+    {"code": "SE", "label": "Sweden", "region": "EU", "default_language": "sv"},
+    {"code": "NO", "label": "Norway", "region": "EU", "default_language": "no"},
     {"code": "AE", "label": "United Arab Emirates", "region": "MENA", "default_language": "ar"},
     {"code": "SA", "label": "Saudi Arabia", "region": "MENA", "default_language": "ar"},
 ]
@@ -30,6 +38,7 @@ PLATFORM_ALIASES = {
     "x": "x",
     "twitter": "x",
     "reddit": "reddit",
+    "discord": "discord",
 }
 
 
@@ -68,6 +77,16 @@ LANGUAGE_ALIASES = {
     "deutsch (german)": "de",
     "deutsch": "de",
     "german": "de",
+    "italiano": "it",
+    "italian": "it",
+    "dansk": "da",
+    "danish": "da",
+    "suomi": "fi",
+    "finnish": "fi",
+    "svenska": "sv",
+    "swedish": "sv",
+    "norsk": "no",
+    "norwegian": "no",
     "العربية (arabic)": "ar",
     "العربية": "ar",
     "arabic": "ar",

@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "UK influencer disclosure guidance.",
   "raw_file": "data/knowledge_base/raw/law_uk_asa_influencer_guide.html",
-  "processed_at": "2026-04-05T07:17:11.977261+00:00",
+  "processed_at": "2026-04-06T03:02:36.590611+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_uk_asa_influencer_guide",
   "source_title": "UK ASA - Influencers guide to making clear that ads are ads",

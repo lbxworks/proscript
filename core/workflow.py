@@ -6,7 +6,9 @@ from core.agents.trend_hunter import run_trend_hunter
 from core.agents.writer import run_writer
 from core.agents.compliance_scope_resolver import run_compliance_scope_resolver
 from core.agents.compliance_retriever import run_compliance_retriever
+from core.agents.compliance_rule_engine import run_compliance_rule_engine
 from core.agents.compliance_reviewer import run_compliance_reviewer
+from core.agents.compliance_rewriter import run_compliance_rewriter
 
 def build_workflow():
     """构建多智能体工作流"""
@@ -19,7 +21,9 @@ def build_workflow():
     workflow.add_node("ScriptWriter", run_writer)
     workflow.add_node("ComplianceScopeResolver", run_compliance_scope_resolver)
     workflow.add_node("ComplianceRetriever", run_compliance_retriever)
+    workflow.add_node("ComplianceRuleEngine", run_compliance_rule_engine)
     workflow.add_node("ComplianceReviewer", run_compliance_reviewer)
+    workflow.add_node("ComplianceRewriter", run_compliance_rewriter)
     
     # 3. 定义流转边 (严格定义执行顺序)
     workflow.add_edge(START, "Profiler")
@@ -27,8 +31,10 @@ def build_workflow():
     workflow.add_edge("TrendHunter", "ScriptWriter")
     workflow.add_edge("ScriptWriter", "ComplianceScopeResolver")
     workflow.add_edge("ComplianceScopeResolver", "ComplianceRetriever")
-    workflow.add_edge("ComplianceRetriever", "ComplianceReviewer")
-    workflow.add_edge("ComplianceReviewer", END)
+    workflow.add_edge("ComplianceRetriever", "ComplianceRuleEngine")
+    workflow.add_edge("ComplianceRuleEngine", "ComplianceReviewer")
+    workflow.add_edge("ComplianceReviewer", "ComplianceRewriter")
+    workflow.add_edge("ComplianceRewriter", END)
     
     # 4. 编译并返回可执行的 App
     app = workflow.compile()

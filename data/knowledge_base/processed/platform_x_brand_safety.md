@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Placement and brand safety settings.",
   "raw_file": "data/knowledge_base/raw/platform_x_brand_safety.html",
-  "processed_at": "2026-04-05T07:17:13.080395+00:00",
+  "processed_at": "2026-04-06T03:02:37.587557+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "platform_x_brand_safety",
   "source_title": "X Brand Safety Policy",

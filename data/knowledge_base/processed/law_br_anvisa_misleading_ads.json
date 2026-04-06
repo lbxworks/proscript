@@ -12,7 +12,7 @@
   "priority": "P1",
   "notes": "Useful for food and supplement category constraints.",
   "raw_file": "data/knowledge_base/raw/law_br_anvisa_misleading_ads.html",
-  "processed_at": "2026-04-05T07:16:50.812710+00:00",
+  "processed_at": "2026-04-06T06:54:57.437937+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_br_anvisa_misleading_ads",
   "source_title": "Brazil ANVISA - Cuidado com a propaganda enganosa",
