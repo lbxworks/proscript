@@ -2,7 +2,8 @@
 langgraph
 langchain
 langchain_core
-langchain_openai  # 用于调用 DeepSeek (兼容 OpenAI 协议)
+langchain_openai  # 用于调用 DeepSeek 兼容接口（保留为备用）
+langchain-google-genai  # 用于调用 Google Gemini API
 
 # Web 界面
 streamlit

@@ -1,51 +1,119 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from langchain_openai import ChatOpenAI
-from dotenv import load_dotenv
 
-# --- 核心修改开始 ---
-# 1. 自动定位项目根目录 (即 utils 文件夹的上一级)
-# __file__ 是当前脚本的路径，parent 是 utils，parent.parent 就是项目根目录
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:  # pragma: no cover - handled at runtime with clear error
+    ChatGoogleGenerativeAI = None
+
+
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
-env_path = project_root / '.env'
+env_path = project_root / ".env"
 
-# 2. 打印调试信息 (告诉你它在去哪里找文件)
 print(f"🔍 正在尝试加载配置: {env_path}")
-
-# 3. 指定路径加载，并且强制覆盖已有的系统环境变量 (解决旧 Key 残留的问题)
 is_loaded = load_dotenv(dotenv_path=env_path, override=True)
 if not is_loaded:
     print("⚠️ 警告: load_dotenv 返回 False，可能文件不存在或为空！")
-# --- 核心修改结束 ---
+
+
+DEFAULT_PROVIDER = "google"
+DEFAULT_GOOGLE_MODEL = "gemini-2.5-flash"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+
+
+def _mask_key(api_key: str) -> str:
+    if not api_key:
+        return ""
+    if len(api_key) <= 10:
+        return "*" * len(api_key)
+    return f"{api_key[:6]}...{api_key[-4:]}"
+
+
+def _get_provider() -> str:
+    provider = os.getenv("LLM_PROVIDER", "").strip().lower()
+    if provider:
+        return provider
+    if os.getenv("GOOGLE_API_KEY"):
+        return "google"
+    if os.getenv("DEEPSEEK_API_KEY"):
+        return "deepseek"
+    return DEFAULT_PROVIDER
+
+
+def _build_google_llm(temperature: float):
+    if ChatGoogleGenerativeAI is None:
+        raise ImportError(
+            "缺少依赖 `langchain-google-genai`。请先安装 requirements.txt 中的新依赖。"
+        )
+
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("未检测到 GOOGLE_API_KEY / GEMINI_API_KEY，请检查 .env 配置。")
+
+    model_name = os.getenv("GOOGLE_MODEL", DEFAULT_GOOGLE_MODEL).strip() or DEFAULT_GOOGLE_MODEL
+    print(f"🔑 [Google] 检测到 Key: {_mask_key(api_key)}")
+    print(f"🤖 [Google] 当前模型: {model_name}")
+
+    kwargs = {
+        "model": model_name,
+        "api_key": api_key,
+        "temperature": temperature,
+        "retries": 2,
+    }
+    if model_name.startswith("gemini-2.5"):
+        kwargs["thinking_budget"] = 0
+
+    return ChatGoogleGenerativeAI(**kwargs)
+
+
+def _build_deepseek_llm(temperature: float):
+    api_key = os.getenv("DEEPSEEK_API_KEY")
+    if not api_key:
+        raise ValueError("未检测到 DEEPSEEK_API_KEY，请检查 .env 配置。")
+
+    model_name = os.getenv("DEEPSEEK_MODEL", DEFAULT_DEEPSEEK_MODEL).strip() or DEFAULT_DEEPSEEK_MODEL
+    print(f"🔑 [DeepSeek] 检测到 Key: {_mask_key(api_key)}")
+    print(f"🤖 [DeepSeek] 当前模型: {model_name}")
+
+    return ChatOpenAI(
+        model=model_name,
+        openai_api_key=api_key,
+        openai_api_base="https://api.deepseek.com",
+        temperature=temperature,
+    )
+
 
 def get_llm(temperature: float = 0.7):
     """
-    获取配置好的 DeepSeek LLM 实例
-    Args:
-        temperature: AI creativity level (0.0-1.0), mapped from GraphState.creativity
-    """
-    api_key = os.getenv("DEEPSEEK_API_KEY")
-    
-    # 打印部分 Key 用于验证 (只显示前5位，安全)
-    if api_key:
-        print(f"🔑 检测到 Key: {api_key[:5]}******")
-    else:
-        print("❌ 错误: 环境变量中未读取到 Key")
-        raise ValueError("请检查 .env 文件是否存在且内容正确")
+    获取配置好的 LLM 实例。
 
-    return ChatOpenAI(
-        model="deepseek-chat", 
-        openai_api_key=api_key,
-        openai_api_base="https://api.deepseek.com", 
-        temperature=temperature
-    )
+    优先级：
+    1. `LLM_PROVIDER`
+    2. 如果存在 `GOOGLE_API_KEY`，默认走 Google Gemini
+    3. 否则回退到 DeepSeek
+    """
+    provider = _get_provider()
+    print(f"🧠 当前 LLM Provider: {provider}")
+
+    if provider == "google":
+        return _build_google_llm(temperature)
+    if provider == "deepseek":
+        return _build_deepseek_llm(temperature)
+
+    raise ValueError(f"不支持的 LLM_PROVIDER: {provider}")
+
 
 if __name__ == "__main__":
-    print("🔄 正在尝试连接 DeepSeek...")
+    print("🔄 正在尝试连接当前默认 LLM...")
     try:
         llm = get_llm()
-        response = llm.invoke("你好，请回复'系统连接成功'这六个字。")
+        response = llm.invoke("你好，请回复“系统连接成功”。")
         print(f"✅ 测试通过: {response.content}")
     except Exception as e:
         print(f"❌ 连接失败: {e}")
