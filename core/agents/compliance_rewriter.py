@@ -5,7 +5,7 @@ import json
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.prompts import SYSTEM_PROMPT_COMPLIANCE_REWRITER
-from utils.llm_client import get_llm
+from utils.llm_client import get_llm, validate_markdown_table_response
 
 
 def run_compliance_rewriter(state: dict) -> dict:
@@ -38,7 +38,11 @@ Return the revised markdown script only.
 """
 
     try:
-        llm = get_llm(temperature=0.2)
+        llm = get_llm(
+            temperature=0.2,
+            task_name="compliance_rewriter",
+            validator=validate_markdown_table_response,
+        )
         response = llm.invoke(
             [
                 SystemMessage(content=SYSTEM_PROMPT_COMPLIANCE_REWRITER),

@@ -1,6 +1,10 @@
 # core/agents/writer.py
 from langchain_core.messages import SystemMessage, HumanMessage
-from utils.llm_client import get_llm
+from utils.llm_client import (
+    get_last_llm_invocation,
+    get_llm,
+    validate_markdown_table_response,
+)
 from core.prompts import SYSTEM_PROMPT_WRITER
 
 
@@ -67,16 +71,27 @@ Output the full sequence of Markdown shooting scripts now. Do NOT skip any scene
 """
 
     try:
-        llm = get_llm(temperature=creativity)
+        llm = get_llm(
+            temperature=creativity,
+            task_name="script_writer",
+            validator=validate_markdown_table_response,
+        )
         messages = [
             SystemMessage(content=formatted_system_prompt),
             HumanMessage(content=user_prompt),
         ]
         response = llm.invoke(messages)
         final_script = response.content
+        llm_meta = get_last_llm_invocation()
         print(f"✅ [Writer Agent] Multi-language script sequence generated ({language_count} languages).")
     except Exception as e:
         print(f"❌ [Writer Agent] LLM generation failed: {e}")
         final_script = f"**Script Generation Failed**\n\nError: `{e}`"
+        llm_meta = {}
 
-    return {"final_script": final_script}
+    return {
+        "final_script": final_script,
+        "script_model_provider": llm_meta.get("provider", ""),
+        "script_model_name": llm_meta.get("model_name", ""),
+        "script_model_fallback_used": bool(llm_meta.get("fallback_used", False)),
+    }

@@ -43,7 +43,7 @@ UI_STRINGS = {
         "section_ai_params": "### 🎛️ AI Parameters",
         "creativity_label": "AI Creativity (Temperature):",
         "creativity_help": "Higher values produce more creative and experimental scripts.",
-        "powered_by": "🚀 Powered by LangGraph + DeepSeek V3",
+        "powered_by": "🚀 Powered by LangGraph + Google Priority + DeepSeek Fallback",
         "target_market": "Target Market:",
         "target_region_pack": "Region Pack",
         "plat_x": "X / Twitter",
@@ -99,6 +99,8 @@ UI_STRINGS = {
         "compliance_citations": "Supporting Citations",
         "compliance_closing": "Overall Commentary",
         "approved_script_title": "✅ Recommended Revision",
+        "script_model_badge": "Model Used",
+        "script_model_fallback": "Fallback",
         "runtime_progress_start": "Preparing the compliance runtime...",
         "runtime_progress_check": "Checking cached model and Qdrant index...",
         "runtime_progress_ready": "Compliance runtime ready.",
@@ -196,7 +198,7 @@ UI_STRINGS = {
         "section_ai_params": "### 🎛️ AI 参数",
         "creativity_label": "AI 创造力（温度值）：",
         "creativity_help": "数值越高，生成的脚本越具创意和实验性。",
-        "powered_by": "🚀 由 LangGraph + DeepSeek V3 驱动",
+        "powered_by": "🚀 由 LangGraph + Google 主路由 + DeepSeek 兜底驱动",
         "target_market": "目标市场：",
         "target_region_pack": "区域包",
         "plat_x": "X / Twitter",
@@ -252,6 +254,8 @@ UI_STRINGS = {
         "compliance_citations": "支持引文",
         "compliance_closing": "整体点评",
         "approved_script_title": "✅ 推荐修改稿",
+        "script_model_badge": "生成模型",
+        "script_model_fallback": "已切换兜底",
         "runtime_progress_start": "正在准备合规运行时...",
         "runtime_progress_check": "正在检查缓存模型和 Qdrant 索引...",
         "runtime_progress_ready": "合规运行时已就绪。",
@@ -349,7 +353,7 @@ UI_STRINGS = {
         "section_ai_params": "### 🎛️ Parámetros de IA",
         "creativity_label": "Creatividad de IA (Temperatura):",
         "creativity_help": "Valores más altos producen guiones más creativos y experimentales.",
-        "powered_by": "🚀 Impulsado por LangGraph + DeepSeek V3",
+        "powered_by": "🚀 Impulsado por LangGraph + Google prioritario + fallback DeepSeek",
         "target_market": "Mercado objetivo:",
         "target_region_pack": "Paquete regional",
         "plat_x": "X / Twitter",
@@ -405,6 +409,8 @@ UI_STRINGS = {
         "compliance_citations": "Citas de respaldo",
         "compliance_closing": "Comentario general",
         "approved_script_title": "✅ Versión recomendada",
+        "script_model_badge": "Modelo usado",
+        "script_model_fallback": "Fallback activado",
         "runtime_progress_start": "Preparando el runtime de compliance...",
         "runtime_progress_check": "Verificando el modelo en caché y el índice de Qdrant...",
         "runtime_progress_ready": "El runtime de compliance está listo.",
@@ -748,6 +754,22 @@ def render_approved_script(original_script: str, approved_script: str, t: dict):
         st.markdown("<div class='script-output'>", unsafe_allow_html=True)
         st.markdown(approved_script)
         st.markdown("</div>", unsafe_allow_html=True)
+
+
+def render_script_model_badge(state: dict, t: dict):
+    provider = str(state.get("script_model_provider", "") or "").strip()
+    model_name = str(state.get("script_model_name", "") or "").strip()
+    fallback_used = bool(state.get("script_model_fallback_used", False))
+    if not provider:
+        return
+
+    provider_label = provider.title()
+    badge = f"{t.get('script_model_badge', 'Model Used')}: {provider_label}"
+    if model_name:
+        badge += f" · {model_name}"
+    if fallback_used:
+        badge += f" · {t.get('script_model_fallback', 'Fallback')}"
+    st.caption(badge)
 
 
 class ComplianceRuntimeController:
@@ -1744,6 +1766,7 @@ if generate_btn:
         if final_script:
             render_trend_hunter_panel(final_state, t)
             st.markdown(f"<div class='section-title'>{t['output_title']}</div>", unsafe_allow_html=True)
+            render_script_model_badge(final_state, t)
             with st.container(border=False):
                 st.markdown("<div class='script-output'>", unsafe_allow_html=True)
                 st.markdown(final_script)

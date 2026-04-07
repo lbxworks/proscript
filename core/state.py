@@ -35,3 +35,6 @@ class GraphState(TypedDict):
     # --- 输出信息 ---
     final_script: Optional[str]
     approved_script: Optional[str]
+    script_model_provider: Optional[str]
+    script_model_name: Optional[str]
+    script_model_fallback_used: Optional[bool]

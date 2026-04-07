@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Sequence
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.prompts import SYSTEM_PROMPT_COMPLIANCE_REVIEWER
-from utils.llm_client import get_llm
+from utils.llm_client import get_llm, validate_json_response
 
 
 ALLOWED_STATUSES = {"approved", "needs_revision", "insufficient_evidence"}
@@ -193,7 +193,11 @@ Return strict JSON only.
 """
 
     try:
-        llm = get_llm(temperature=0.2)
+        llm = get_llm(
+            temperature=0.2,
+            task_name="compliance_reviewer",
+            validator=validate_json_response,
+        )
         response = llm.invoke(
             [
                 SystemMessage(content=formatted_system_prompt),
