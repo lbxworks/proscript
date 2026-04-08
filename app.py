@@ -14,6 +14,7 @@ from core.compliance_kb import (
     rebuild_knowledge_runtime,
 )
 from core.workflow import build_workflow
+from utils.tavily_client import search_viral_video_benchmarks
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'app.db')
 LANG_OPTIONS = {"简体中文": "zh", "English": "en", "Español": "es"}
@@ -162,10 +163,17 @@ UI_STRINGS = {
         "output_title": "🎬 Professional Shooting Script",
         "save_success": "✅ Script saved to local database (app.db)",
         # Gallery
-        "section_viral": "🔥 Platform Viral Benchmarks",
-        "gallery_1": "「Cyberpunk Cat」▶ 9.8M Views — TikTok",
-        "gallery_2": "「Neon City Retro」▶ 12.1M Views — YouTube Shorts",
-        "gallery_3": "「AI Epoch」▶ 15.6M Views — Instagram Reels",
+        "section_viral": "🔥 Viral Tech Video Benchmarks",
+        "section_viral_subtitle": "Live Tavily scan of public {scope} posts from the last 3 days in {country}. Only results with 1M+ view signals are shown.",
+        "section_viral_live": "Live via Tavily",
+        "section_viral_mixed_scope": "TikTok / Instagram / X",
+        "section_viral_window": "Last 3 days",
+        "section_viral_views": "views",
+        "section_viral_open": "Open video",
+        "section_viral_refresh": "🔄 Refresh",
+        "section_viral_note": "View counts are parsed heuristically from public snippets returned by Tavily.",
+        "section_viral_empty": "No recent public TikTok / Instagram / X videos with 1M+ view signals were detected for this market.",
+        "section_viral_loading": "Scanning recent public platform videos...",
         # Templates
         "section_templates": "🎨 Pro Script Templates",
         "tpl_1_title": "🖥 Tech Unboxing Long Take",
@@ -317,10 +325,17 @@ UI_STRINGS = {
         "output_title": "🎬 专业拍摄脚本",
         "save_success": "✅ 脚本已保存至本地数据库 (app.db)",
         # Gallery
-        "section_viral": "🔥 全球爆款视频参考",
-        "gallery_1": "「赛博朋克猫」▶ 980万播放 — TikTok",
-        "gallery_2": "「霓虹复古城市」▶ 1210万播放 — YouTube Shorts",
-        "gallery_3": "「AI 纪元」▶ 1560万播放 — Instagram Reels",
+        "section_viral": "🔥 近三天科技热视频基准",
+        "section_viral_subtitle": "通过 Tavily 实时扫描 {country} 市场近 3 天内的公开 {scope} 内容，仅展示检测到 100 万以上播放信号的视频结果。",
+        "section_viral_live": "Tavily 实时数据",
+        "section_viral_mixed_scope": "TikTok / Instagram / X",
+        "section_viral_window": "近 3 天",
+        "section_viral_views": "播放",
+        "section_viral_open": "打开视频",
+        "section_viral_refresh": "🔄 换一换",
+        "section_viral_note": "播放量来自 Tavily 返回的公开片段文本解析，属于启发式识别结果。",
+        "section_viral_empty": "当前市场下，暂未检索到近 3 天内带有 100 万以上播放信号的公开 TikTok / Instagram / X 科技热视频。",
+        "section_viral_loading": "正在扫描最近公开平台热视频...",
         # Templates
         "section_templates": "🎨 专业脚本模板",
         "tpl_1_title": "🖥 科技开箱长镜头",
@@ -472,10 +487,17 @@ UI_STRINGS = {
         "output_title": "🎬 Guion Profesional de Rodaje",
         "save_success": "✅ Guion guardado en la base de datos local (app.db)",
         # Gallery
-        "section_viral": "🔥 Referencias Virales de Plataformas",
-        "gallery_1": "「Cyberpunk Cat」▶ 9.8M Vistas — TikTok",
-        "gallery_2": "「Neon City Retro」▶ 12.1M Vistas — YouTube Shorts",
-        "gallery_3": "「AI Epoch」▶ 15.6M Vistas — Instagram Reels",
+        "section_viral": "🔥 Referencias de videos virales tech",
+        "section_viral_subtitle": "Escaneo en vivo con Tavily de publicaciones públicas de {scope} en {country} durante los últimos 3 días. Solo se muestran resultados con señales de más de 1M de vistas.",
+        "section_viral_live": "En vivo con Tavily",
+        "section_viral_mixed_scope": "TikTok / Instagram / X",
+        "section_viral_window": "Últimos 3 días",
+        "section_viral_views": "vistas",
+        "section_viral_open": "Abrir video",
+        "section_viral_refresh": "🔄 Cambiar",
+        "section_viral_note": "Las vistas se estiman heurísticamente a partir de fragmentos públicos devueltos por Tavily.",
+        "section_viral_empty": "No se detectaron videos públicos recientes de TikTok / Instagram / X con señales de más de 1M de vistas para este mercado.",
+        "section_viral_loading": "Escaneando videos públicos recientes...",
         # Templates
         "section_templates": "🎨 Plantillas de Guion Profesional",
         "tpl_1_title": "🖥 Unboxing Tech Plano Largo",
@@ -537,6 +559,23 @@ def _trend_is_live(state: dict) -> bool:
     trend_sources = state.get("trend_sources", []) or []
     trend_data = str(state.get("trend_data", "") or "")
     return bool(trend_sources) or "[Live Trend Intelligence]" in trend_data
+
+
+def _get_market_label(country_code: str) -> str:
+    for market in MARKETS:
+        if market["code"] == country_code:
+            return market["label"]
+    return country_code
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_cached_viral_benchmarks(target_platform: str, target_country: str, refresh_token: int = 0) -> list[dict]:
+    return search_viral_video_benchmarks(
+        platform=target_platform,
+        country_label=_get_market_label(target_country),
+        days=3,
+        max_results=4,
+    )
 
 
 def _extract_trend_summary(trend_data: str) -> str:
@@ -659,6 +698,110 @@ def render_trend_hunter_panel(state: dict, t: dict):
 
     st.markdown(build_workflow_trace_html(state, t), unsafe_allow_html=True)
     st.markdown(build_trend_hunter_html(state, t), unsafe_allow_html=True)
+
+
+def build_viral_benchmarks_html(items: list[dict], target_platform: str, target_country: str, t: dict) -> str:
+    supported_platforms = {"tiktok", "instagram", "x"}
+    platform_labels = {
+        "tiktok": t.get("plat_tiktok", "TikTok"),
+        "instagram": t.get("plat_instagram", "Instagram Reels"),
+        "x": t.get("plat_x", "X"),
+    }
+    item_platforms = {str(item.get("platform_key", "") or "") for item in items if item.get("platform_key")}
+    if target_platform in supported_platforms and item_platforms == {target_platform}:
+        scope_label = platform_labels.get(target_platform, target_platform.title())
+    elif target_platform in supported_platforms and not item_platforms:
+        scope_label = platform_labels.get(target_platform, target_platform.title())
+    else:
+        scope_label = t.get("section_viral_mixed_scope", "TikTok / Instagram / X")
+    subtitle = t.get(
+        "section_viral_subtitle",
+        "Live Tavily scan of public {scope} posts from the last 3 days in {country}. Only results with 1M+ view signals are shown.",
+    ).format(scope=scope_label, country=_get_market_label(target_country))
+
+    if not items:
+        cards_html = f"<div class='viral-empty'>{html.escape(t.get('section_viral_empty', 'No recent videos were found.'))}</div>"
+    else:
+        cards = []
+        for item in items:
+            image_url = str(item.get("image_url", "") or "").strip()
+            title = str(item.get("title", "") or "Untitled video")
+            summary = str(item.get("summary", "") or "")
+            url = str(item.get("url", "") or "").strip()
+            platform = str(item.get("platform", "") or "Platform")
+            views_label = f"{item.get('view_count_label', '1.0M')} {t.get('section_viral_views', 'views')}"
+            image_block = (
+                f"<div class='viral-card-image' style=\"background-image: linear-gradient(180deg, rgba(15,23,42,0.02) 0%, rgba(15,23,42,0.12) 100%), url('{html.escape(image_url, quote=True)}');\"></div>"
+                if image_url
+                else f"<div class='viral-card-image viral-card-fallback'>{html.escape(platform)}</div>"
+            )
+            cards.append(
+                "<div class='viral-card'>"
+                f"<a class='viral-card-media' href='{html.escape(url, quote=True)}' target='_blank' rel='noopener noreferrer'>{image_block}</a>"
+                "<div class='viral-card-body'>"
+                "<div class='viral-card-topline'>"
+                f"<span class='viral-platform-chip'>{html.escape(platform)}</span>"
+                f"<span class='viral-views-pill'>{html.escape(views_label)}</span>"
+                "</div>"
+                f"<a class='viral-card-title' href='{html.escape(url, quote=True)}' target='_blank' rel='noopener noreferrer'>{html.escape(title)}</a>"
+                f"<div class='viral-card-summary'>{html.escape(summary)}</div>"
+                "<div class='viral-card-meta'>"
+                f"<span>{html.escape(t.get('section_viral_window', 'Last 3 days'))}</span>"
+                f"<span>·</span><span>{html.escape(t.get('section_viral_open', 'Open video'))}</span>"
+                "</div>"
+                "</div>"
+                "</div>"
+            )
+        cards_html = "".join(cards)
+
+    return (
+        "<div class='viral-shell'>"
+        f"<div class='viral-subtitle'>{html.escape(subtitle)}</div>"
+        f"<div class='viral-grid'>{cards_html}</div>"
+        f"<div class='viral-note'>{html.escape(t.get('section_viral_note', 'View counts are parsed heuristically from public snippets returned by Tavily.'))}</div>"
+        "</div>"
+    )
+
+
+def render_viral_benchmarks_section(target_platform: str, target_country: str, t: dict):
+    scope_key = f"{target_country}:{target_platform}"
+    session_cache = st.session_state.setdefault("viral_benchmark_results", {})
+    refresh_tokens = st.session_state.setdefault("viral_benchmark_refresh_tokens", {})
+
+    title_col, button_col = st.columns([6, 1])
+    with title_col:
+        st.markdown(
+            f"<div class='section-title'>{html.escape(t.get('section_viral', '🔥 Viral Tech Video Benchmarks'))}</div>",
+            unsafe_allow_html=True,
+        )
+    with button_col:
+        refresh_clicked = st.button(
+            t.get("section_viral_refresh", "🔄 Refresh"),
+            key=f"viral_refresh_{scope_key}",
+            use_container_width=True,
+        )
+
+    if refresh_clicked:
+        refresh_tokens[scope_key] = int(refresh_tokens.get(scope_key, 0) or 0) + 1
+        session_cache.pop(scope_key, None)
+
+    try:
+        if scope_key not in session_cache:
+            with st.spinner(t.get("section_viral_loading", "Scanning recent public platform videos...")):
+                session_cache[scope_key] = get_cached_viral_benchmarks(
+                    target_platform,
+                    target_country,
+                    refresh_tokens.get(scope_key, 0),
+                )
+        items = session_cache.get(scope_key, [])
+    except Exception as exc:
+        st.info(f"{t.get('section_viral_empty', 'No recent videos were found.')} ({exc})")
+        return
+
+    st.markdown(
+        build_viral_benchmarks_html(items, target_platform, target_country, t),
+        unsafe_allow_html=True,
+    )
 
 
 def render_compliance_review(report: dict, state: dict, t: dict):
@@ -1460,6 +1603,123 @@ h1, h2, h3, h4 {
     padding: 16px;
     color: #CBD5E1;
 }
+.viral-shell {
+    background: rgba(14, 165, 233, 0.04);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 18px;
+    padding: 22px;
+}
+.viral-subtitle {
+    color: #94A3B8;
+    line-height: 1.7;
+    margin-bottom: 18px;
+}
+.viral-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+.viral-card {
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 18px;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.viral-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 18px 30px rgba(2, 6, 23, 0.5);
+}
+.viral-card-media {
+    display: block;
+    text-decoration: none;
+}
+.viral-card-image {
+    display: block;
+    width: 100%;
+    height: 220px;
+    background-color: #111827;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.viral-card-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.28), rgba(99, 102, 241, 0.28));
+    color: #E0F2FE;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.viral-card-body {
+    padding: 16px;
+}
+.viral-card-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.viral-platform-chip {
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: rgba(56, 189, 248, 0.12);
+    color: #BAE6FD;
+    font-size: 12px;
+    font-weight: 700;
+}
+.viral-views-pill {
+    color: #E5E7EB;
+    font-size: 12px;
+    font-weight: 700;
+}
+.viral-shell a.viral-card-title,
+.viral-shell a.viral-card-title:link,
+.viral-shell a.viral-card-title:visited {
+    display: block;
+    color: #F8FAFC !important;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.35;
+    text-decoration: none !important;
+    margin-bottom: 10px;
+}
+.viral-shell a.viral-card-title:hover {
+    color: #7DD3FC !important;
+    text-decoration: none !important;
+}
+.viral-card-summary {
+    color: #CBD5E1;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 72px;
+}
+.viral-card-meta {
+    margin-top: 14px;
+    color: #94A3B8;
+    font-size: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.viral-note {
+    color: #64748B;
+    font-size: 12px;
+    margin-top: 16px;
+    line-height: 1.7;
+}
+.viral-empty {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px dashed rgba(148, 163, 184, 0.2);
+    border-radius: 14px;
+    padding: 18px;
+    color: #CBD5E1;
+}
 .issue-card {
     margin-top: 16px;
     background: rgba(15, 23, 42, 0.86);
@@ -1548,6 +1808,9 @@ h1, h2, h3, h4 {
     .compliance-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+    .viral-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .trend-source-grid {
         grid-template-columns: 1fr;
     }
@@ -1556,6 +1819,9 @@ h1, h2, h3, h4 {
 @media (max-width: 640px) {
     .workflow-grid,
     .compliance-grid {
+        grid-template-columns: 1fr;
+    }
+    .viral-grid {
         grid-template-columns: 1fr;
     }
     .trend-meta-grid {
@@ -1786,20 +2052,7 @@ st.markdown("""
 # =====================================================================
 # 7. Viral Reference Gallery
 # =====================================================================
-st.markdown(f"<div class='section-title'>{t['section_viral']}</div>", unsafe_allow_html=True)
-vcol1, vcol2, vcol3 = st.columns(3)
-
-with vcol1:
-    st.image("https://media.tenor.com/P4WmbwG8qSMAAAAd/cybercat.gif", width="stretch")
-    st.markdown(f"<div class='gallery-caption'>{t['gallery_1']}</div>", unsafe_allow_html=True)
-
-with vcol2:
-    st.image("https://media.tenor.com/PihZ-UcwH0oAAAAC/neon-city-retro.gif", width="stretch")
-    st.markdown(f"<div class='gallery-caption'>{t['gallery_2']}</div>", unsafe_allow_html=True)
-
-with vcol3:
-    st.image("https://media.tenor.com/p_N7b0qB23oAAAAC/ai-artificial-intelligence.gif", width="stretch")
-    st.markdown(f"<div class='gallery-caption'>{t['gallery_3']}</div>", unsafe_allow_html=True)
+render_viral_benchmarks_section(target_platform, target_country, t)
 
 # =====================================================================
 # 8. Pro Templates
