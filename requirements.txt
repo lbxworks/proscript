@@ -7,6 +7,8 @@ langchain-google-genai  # 用于调用 Google Gemini API
 
 # Web 界面
 streamlit
+fastapi
+uvicorn
 
 # 工具集
 tavily-python     # 搜索工具
