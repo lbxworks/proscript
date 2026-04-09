@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Influencer disclosure reminder from Brazilian authority.",
   "raw_file": "data/knowledge_base/raw/law_br_senacon_social_media_ads.html",
-  "processed_at": "2026-04-06T06:54:57.591888+00:00",
+  "processed_at": "2026-04-09T18:32:50.411871+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_br_senacon_social_media_ads",
   "source_title": "Brazil Senacon - Social Media Ads Must Be Clearly Identified",

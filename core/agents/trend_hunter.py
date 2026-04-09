@@ -116,7 +116,7 @@ def _fallback_trend_data(state: dict, query: str, reason: str) -> str:
     )
 
 
-def run_trend_hunter(state: dict) -> dict:
+def run_trend_hunter(state: dict, *, cache_buster: str = "") -> dict:
     print("🤖 [Agent] Trend Hunter 执行中: 正在全网检索热点...")
     query, country_for_search = _build_query(state)
 
@@ -126,6 +126,7 @@ def run_trend_hunter(state: dict) -> dict:
             country=country_for_search,
             days=30,
             max_results=5,
+            cache_buster=cache_buster,
         )
         trend_data = _format_trend_data(state, response, query)
         trend_sources = [

@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Ad-side restrictions and legal compliance language.",
   "raw_file": "data/knowledge_base/raw/platform_tiktok_ads_policy.html",
-  "processed_at": "2026-04-06T03:02:37.532158+00:00",
+  "processed_at": "2026-04-09T18:33:14.002185+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "platform_tiktok_ads_policy",
   "source_title": "TikTok Advertising Policies - Other Products and Services",

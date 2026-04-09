@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Updated 2025 influencer labeling guidance.",
   "raw_file": "data/knowledge_base/raw/law_fi_influencer_guideline.html",
-  "processed_at": "2026-04-06T06:55:00.256364+00:00",
+  "processed_at": "2026-04-09T18:32:53.514952+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_fi_influencer_guideline",
   "source_title": "Finland Consumer Ombudsman - Labeling influencer marketing",

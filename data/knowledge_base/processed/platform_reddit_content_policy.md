@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Sitewide content rules.",
   "raw_file": "data/knowledge_base/raw/platform_reddit_content_policy.html",
-  "processed_at": "2026-04-06T03:02:37.503233+00:00",
+  "processed_at": "2026-04-09T18:33:13.970086+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "platform_reddit_content_policy",
   "source_title": "Reddit Content Policy",

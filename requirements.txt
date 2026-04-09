@@ -9,6 +9,7 @@ langchain-google-genai  # 用于调用 Google Gemini API
 streamlit
 fastapi
 uvicorn
+python-multipart
 
 # 工具集
 tavily-python     # 搜索工具

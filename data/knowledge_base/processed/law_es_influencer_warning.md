@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Official notice on covert advertising fines.",
   "raw_file": "data/knowledge_base/raw/law_es_influencer_warning.html",
-  "processed_at": "2026-04-06T06:54:59.410415+00:00",
+  "processed_at": "2026-04-09T18:32:52.545268+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_es_influencer_warning",
   "source_title": "Spain Ministry of Consumer Affairs - warning to influencers",

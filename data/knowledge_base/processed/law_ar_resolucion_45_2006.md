@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Normative text on deceptive advertising.",
   "raw_file": "data/knowledge_base/raw/law_ar_resolucion_45_2006.html",
-  "processed_at": "2026-04-06T06:54:57.398137+00:00",
+  "processed_at": "2026-04-09T18:32:50.221414+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_ar_resolucion_45_2006",
   "source_title": "Argentina - Resolucion 45/2006 MERCOSUR misleading advertising",

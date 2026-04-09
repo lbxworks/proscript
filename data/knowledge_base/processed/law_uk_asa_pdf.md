@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Downloadable PDF guide.",
   "raw_file": "data/knowledge_base/raw/law_uk_asa_pdf.pdf",
-  "processed_at": "2026-04-06T03:02:37.380456+00:00",
+  "processed_at": "2026-04-09T18:33:13.833405+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_uk_asa_pdf",
   "source_title": "UK ASA - Influencers guide PDF",

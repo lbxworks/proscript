@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Central policy landing page.",
   "raw_file": "data/knowledge_base/raw/platform_discord_policy_hub.html",
-  "processed_at": "2026-04-06T03:02:37.430940+00:00",
+  "processed_at": "2026-04-09T18:33:13.890423+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "platform_discord_policy_hub",
   "source_title": "Discord Policy Hub",

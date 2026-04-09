@@ -32,17 +32,30 @@ PLATFORM_LABELS = {
 }
 VIRAL_QUERY_HINTS = {
     "tiktok": (
-        "tech gadget AI million views TikTok",
-        "TikTok tech AI robot viral video 1M views",
+        "{country} {focus} TikTok viral video public creator post last {days} days",
+        "{country} {focus} TikTok short video trending example public post",
     ),
     "instagram": (
-        "Instagram Reels AI tech million views",
-        "How I did 1.7 million views AI tech Instagram",
+        "{country} {focus} Instagram Reels viral creator video last {days} days",
+        "{country} {focus} Instagram Reels high views creator example",
     ),
     "x": (
-        "X Twitter AI tech viral video views",
-        "X Twitter technology AI trending video",
+        "{country} {focus} X Twitter viral video creator post last {days} days",
+        "{country} {focus} X Twitter trending clip high engagement",
     ),
+}
+PRODUCT_CATEGORY_HINTS = {
+    "general": "creator storytelling",
+    "beauty": "beauty skincare makeup creator review",
+    "electronics": "tech gadget electronics creator review",
+    "fashion": "fashion outfit styling creator review",
+    "food_beverage": "food beverage snack drink creator review",
+    "health_supplement": "health supplement wellness creator review",
+}
+DISTRIBUTION_QUERY_HINTS = {
+    "organic": "organic creator trend audience engagement",
+    "branded_content": "brand partnership creator sponsored style",
+    "paid_ads": "performance creative paid social winning ad",
 }
 VIEW_PATTERNS = (
     re.compile(r"(\d+(?:\.\d+)?)\s*([mk])\s*(?:views?|plays?)", re.IGNORECASE),
@@ -82,6 +95,27 @@ def _compact_text(value: str | None, limit: int = 180) -> str:
     if len(collapsed) <= limit:
         return collapsed
     return collapsed[: limit - 3].rstrip() + "..."
+
+
+def _normalize_focus_text(topic: str, product_category: str, distribution_mode: str) -> str:
+    focus_parts: list[str] = []
+    cleaned_topic = " ".join(topic.split()).strip()
+    if cleaned_topic:
+        focus_parts.append(cleaned_topic)
+
+    category_hint = PRODUCT_CATEGORY_HINTS.get(
+        product_category,
+        product_category.replace("_", " ").strip(),
+    ).strip()
+    if category_hint:
+        focus_parts.append(category_hint)
+
+    mode_hint = DISTRIBUTION_QUERY_HINTS.get(distribution_mode, "").strip()
+    if mode_hint:
+        focus_parts.append(mode_hint)
+
+    normalized = " ".join(part for part in focus_parts if part).strip()
+    return normalized or "creator product storytelling"
 
 
 def _infer_platform_from_url(url: str) -> str:
@@ -179,11 +213,23 @@ def _extract_age_days(text: str) -> int | None:
     return None
 
 
-def _build_viral_queries(platform: str, country_label: str) -> tuple[str, ...]:
+def _build_viral_queries(
+    platform: str,
+    country_label: str,
+    *,
+    topic: str = "",
+    product_category: str = "",
+    distribution_mode: str = "",
+    days: int = 3,
+) -> tuple[str, ...]:
     country_hint = country_label.strip() or "global"
-    platform_hints = VIRAL_QUERY_HINTS.get(platform, ("technology ai gadget viral video million views",))
+    focus_text = _normalize_focus_text(topic, product_category, distribution_mode)
+    platform_hints = VIRAL_QUERY_HINTS.get(
+        platform,
+        ("{country} {focus} viral social video public post last {days} days",),
+    )
     return tuple(
-        f"{country_hint} {platform_hint} last 3 days public post"
+        platform_hint.format(country=country_hint, focus=focus_text, days=days)
         for platform_hint in platform_hints
     )
 
@@ -199,10 +245,13 @@ def tavily_search(
     include_images: bool = False,
     search_depth: str = "basic",
     timeout: int = 45,
+    cache_buster: str = "",
 ) -> dict[str, Any]:
     client = get_tavily_client()
     if client is None:
         raise RuntimeError("Tavily client is not configured.")
+
+    _ = cache_buster
 
     search_kwargs = {
         "query": query,
@@ -251,13 +300,25 @@ def search_viral_video_benchmarks(
     country_label: str = "",
     days: int = 3,
     max_results: int = 4,
+    minimum_view_count: int = 100_000,
+    topic: str = "",
+    product_category: str = "",
+    distribution_mode: str = "",
+    cache_buster: str = "",
 ) -> list[dict[str, Any]]:
     requested_platforms = [platform] if platform in SUPPORTED_VIRAL_PLATFORMS else list(SUPPORTED_VIRAL_PLATFORMS)
     collected: list[dict[str, Any]] = []
     seen_urls: set[str] = set()
 
     def _collect_for_platform(platform_name: str):
-        for query in _build_viral_queries(platform_name, country_label):
+        for query in _build_viral_queries(
+            platform_name,
+            country_label,
+            topic=topic,
+            product_category=product_category,
+            distribution_mode=distribution_mode,
+            days=days,
+        ):
             response = tavily_search(
                 query=query,
                 country=country_label.lower(),
@@ -267,6 +328,7 @@ def search_viral_video_benchmarks(
                 include_answer=False,
                 include_images=True,
                 search_depth="advanced",
+                cache_buster=cache_buster,
             )
             images = response.get("images", []) or []
             results = response.get("results", []) or []
@@ -284,7 +346,10 @@ def search_viral_video_benchmarks(
                 if age_days is not None and age_days > days:
                     continue
                 view_count = _extract_view_count(text_blob)
-                if not view_count or view_count < 1_000_000:
+                score = float(item.get("score", 0.0) or 0.0)
+                if view_count is not None and view_count < minimum_view_count:
+                    continue
+                if view_count is None and score < 0.85:
                     continue
 
                 inferred_platform = _infer_platform_from_url(url) or platform_name
@@ -295,10 +360,10 @@ def search_viral_video_benchmarks(
                         "url": url,
                         "platform": PLATFORM_LABELS.get(inferred_platform, inferred_platform.title()),
                         "platform_key": inferred_platform,
-                        "view_count": view_count,
-                        "view_count_label": _format_view_count(view_count),
+                        "view_count": view_count or 0,
+                        "view_count_label": _format_view_count(view_count) if view_count else "实时命中",
                         "summary": _compact_text(item.get("content", ""), limit=140),
-                        "score": item.get("score", 0.0) or 0.0,
+                        "score": score,
                         "image_url": images[index] if index < len(images) else "",
                         "favicon": item.get("favicon", "") or "",
                     }

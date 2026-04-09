@@ -13,7 +13,7 @@
   "priority": "P2",
   "notes": "Supplemental technical reference.",
   "raw_file": "data/knowledge_base/raw/tech_ragflow_docs_repo.html",
-  "processed_at": "2026-04-06T03:02:37.618815+00:00",
+  "processed_at": "2026-04-09T18:33:14.161343+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "tech_ragflow_docs_repo",
   "source_title": "RAGFlow Docs Repository",

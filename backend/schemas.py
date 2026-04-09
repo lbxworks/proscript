@@ -28,3 +28,12 @@ class ReviewScriptRequest(BaseModel):
     distribution_mode: str = "branded_content"
     product_category: str = "general"
     brand_id: str = "default"
+
+
+class TalentMutationRequest(BaseModel):
+    name: str = Field(min_length=1)
+    platform: str = "未设置"
+    email: str = ""
+    recent_video_link: str = ""
+    notes: str = ""
+    collaboration_progress: str = "待沟通"

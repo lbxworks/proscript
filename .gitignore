@@ -54,3 +54,11 @@ __pycache__/
 .vscode/
 *.swp
 *.swo
+
+# ========================
+# 7. Node / Frontend 构建产物
+# ========================
+node_modules/
+.next/
+.turbo/
+dist/

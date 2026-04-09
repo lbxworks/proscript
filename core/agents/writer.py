@@ -3,6 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from utils.llm_client import (
     get_last_llm_invocation,
     get_llm,
+    validate_non_empty_response,
     validate_markdown_table_response,
 )
 from core.prompts import SYSTEM_PROMPT_WRITER
@@ -85,9 +86,21 @@ Output the full sequence of Markdown shooting scripts now. Do NOT skip any scene
         llm_meta = get_last_llm_invocation()
         print(f"✅ [Writer Agent] Multi-language script sequence generated ({language_count} languages).")
     except Exception as e:
-        print(f"❌ [Writer Agent] LLM generation failed: {e}")
-        final_script = f"**Script Generation Failed**\n\nError: `{e}`"
-        llm_meta = {}
+        print(f"⚠️ [Writer Agent] Strict markdown validation failed, retrying with relaxed validation: {e}")
+        try:
+            relaxed_llm = get_llm(
+                temperature=creativity,
+                task_name="script_writer_relaxed",
+                validator=validate_non_empty_response,
+            )
+            relaxed_response = relaxed_llm.invoke(messages)
+            final_script = relaxed_response.content
+            llm_meta = get_last_llm_invocation()
+            print("✅ [Writer Agent] Script generated via relaxed validation fallback.")
+        except Exception as retry_error:
+            print(f"❌ [Writer Agent] LLM generation failed: {retry_error}")
+            final_script = f"**Script Generation Failed**\n\nError: `{retry_error}`"
+            llm_meta = {}
 
     return {
         "final_script": final_script,

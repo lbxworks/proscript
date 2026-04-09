@@ -37,6 +37,33 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS talent_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE,
+            name TEXT NOT NULL,
+            platform TEXT NOT NULL DEFAULT '未设置',
+            email TEXT DEFAULT '',
+            recent_video_link TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            collaboration_progress TEXT NOT NULL DEFAULT '待沟通',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS trend_snapshots (
+            module_name TEXT NOT NULL,
+            scope_key TEXT NOT NULL,
+            filters_json TEXT NOT NULL DEFAULT '{}',
+            payload_json TEXT NOT NULL DEFAULT '{}',
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (module_name, scope_key)
+        )
+    ''')
+
     conn.commit()
     conn.close()
     print(f"✅ Database initialized: {DB_PATH}")

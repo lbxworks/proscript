@@ -15,12 +15,51 @@ uvicorn backend.main:app --reload
 
 ## 已实现的接口
 
+- `GET /talents`
+- `POST /talents`
+- `PATCH /talents/{talent_id}`
+- `DELETE /talents/{talent_id}`
 - `POST /scripts/generate`
 - `POST /scripts/review`
 - `GET /trends`
 - `GET /library/health`
+- `GET /library/documents`
+- `POST /library/upload`
+- `POST /library/rebuild`
+
+`GET /trends` 支持两个模块级刷新参数：
+
+- `refresh_videos=true`：仅刷新“合适的视频”模块
+- `refresh_industry=true`：仅刷新“行业情报”模块
+
+如果不传刷新参数，接口会优先返回同一组筛选条件下的上一次缓存结果。
 
 ## 示例
+
+### 达人管理
+
+```bash
+curl "http://127.0.0.1:8000/talents"
+```
+
+```bash
+curl -X POST http://127.0.0.1:8000/talents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "新达人",
+    "platform": "TikTok",
+    "email": "creator@example.com",
+    "recent_video_link": "https://www.tiktok.com/@creator/video/123",
+    "notes": "主打数码开箱与测评",
+    "collaboration_progress": "初步对接"
+  }'
+```
+
+说明：
+
+- 新增达人时，系统会自动同步一份 `users` 资料，用于脚本生成模块读取达人风格。
+- 达人管理中的“备注描述”会作为脚本生成的人设 / 风格提示词来源。
+- 删除达人时，会同步删除对应 `users` 档案，但会保留已有 `scripts` 历史记录。
 
 ### 生成脚本
 
@@ -56,8 +95,46 @@ curl -X POST http://127.0.0.1:8000/scripts/review \
 curl "http://127.0.0.1:8000/trends?target_country=US&target_platform=tiktok"
 ```
 
+```bash
+curl "http://127.0.0.1:8000/trends?topic=AI%20glasses&target_country=US&target_platform=tiktok&distribution_mode=branded_content&product_category=electronics&target_languages=English&refresh_videos=true"
+```
+
 ### 图书馆健康状态
 
 ```bash
 curl "http://127.0.0.1:8000/library/health"
+```
+
+### 图书馆文档列表
+
+```bash
+curl "http://127.0.0.1:8000/library/documents"
+```
+
+### 上传图书馆资料
+
+```bash
+curl -X POST http://127.0.0.1:8000/library/upload \
+  -F "file=@/absolute/path/to/policy.pdf" \
+  -F "title=TikTok US Policy" \
+  -F "category=platform_policy" \
+  -F "market=US" \
+  -F "region=AMER" \
+  -F "platform=tiktok" \
+  -F "language=en" \
+  -F "source_url=https://example.com/policy" \
+  -F "notes=用于 TikTok 美国市场合规审查" \
+  -F "priority=P1"
+```
+
+说明：
+
+- `pdf/html` 会写入 `raw/`，并登记到 `source_catalog.json`
+- `md/txt` 会直接生成带元数据的 `processed/*.md`
+- 上传后通常状态为“待重建”，点重建后才会进入最新索引
+
+### 重建图书馆
+
+```bash
+curl -X POST "http://127.0.0.1:8000/library/rebuild"
 ```

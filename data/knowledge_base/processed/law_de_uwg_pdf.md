@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Downloadable PDF version.",
   "raw_file": "data/knowledge_base/raw/law_de_uwg_pdf.pdf",
-  "processed_at": "2026-04-06T06:54:59.113421+00:00",
+  "processed_at": "2026-04-09T18:32:52.271935+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_de_uwg_pdf",
   "source_title": "Germany - UWG PDF",

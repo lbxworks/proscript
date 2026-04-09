@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.schemas import GenerateScriptRequest, ReviewScriptRequest
-from backend.services.library import get_library_health
+from backend.schemas import GenerateScriptRequest, ReviewScriptRequest, TalentMutationRequest
+from backend.services.library import (
+    get_library_health,
+    list_library_documents,
+    rebuild_library,
+    upload_library_document,
+)
 from backend.services.scripts import generate_script, review_script
+from backend.services.talents import create_talent, get_talents, remove_talent, update_talent
 from backend.services.trends import explore_trends
 
 
@@ -27,6 +33,46 @@ app.add_middleware(
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/talents")
+def talents_endpoint():
+    try:
+        return get_talents()
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/talents")
+def create_talent_endpoint(payload: TalentMutationRequest):
+    try:
+        return create_talent(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.patch("/talents/{talent_id}")
+def update_talent_endpoint(talent_id: int, payload: TalentMutationRequest):
+    try:
+        return update_talent(talent_id, payload)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.delete("/talents/{talent_id}")
+def delete_talent_endpoint(talent_id: int):
+    try:
+        return remove_talent(talent_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.post("/scripts/generate")
@@ -53,6 +99,8 @@ def trends_endpoint(
     distribution_mode: str = "branded_content",
     product_category: str = "general",
     target_languages: list[str] = Query(default=["English"]),
+    refresh_videos: bool = False,
+    refresh_industry: bool = False,
 ):
     try:
         return explore_trends(
@@ -62,6 +110,8 @@ def trends_endpoint(
             distribution_mode=distribution_mode,
             product_category=product_category,
             target_languages=target_languages,
+            refresh_videos=refresh_videos,
+            refresh_industry=refresh_industry,
         )
     except Exception as exc:  # pragma: no cover - exercised through integration runs
         raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -71,5 +121,55 @@ def trends_endpoint(
 def library_health_endpoint(initialize: bool = False):
     try:
         return get_library_health(initialize=initialize)
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/library/documents")
+def library_documents_endpoint():
+    try:
+        return list_library_documents()
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/library/rebuild")
+def library_rebuild_endpoint():
+    try:
+        return rebuild_library()
+    except Exception as exc:  # pragma: no cover - exercised through integration runs
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/library/upload")
+async def library_upload_endpoint(
+    file: UploadFile = File(...),
+    title: str = Form(""),
+    category: str = Form("platform_policy"),
+    market: str = Form("GLOBAL"),
+    region: str = Form("GLOBAL"),
+    platform: str = Form("all"),
+    language: str = Form("en"),
+    source_url: str = Form(""),
+    notes: str = Form(""),
+    priority: str = Form("P2"),
+):
+    try:
+        content = await file.read()
+        return upload_library_document(
+            filename=file.filename or "upload.bin",
+            content=content,
+            title=title,
+            category=category,
+            market=market,
+            region=region,
+            platform=platform,
+            language=language,
+            source_url=source_url,
+            notes=notes,
+            priority=priority,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # pragma: no cover - exercised through integration runs
         raise HTTPException(status_code=500, detail=str(exc)) from exc
