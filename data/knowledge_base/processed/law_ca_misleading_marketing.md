@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "General deceptive marketing law guidance.",
   "raw_file": "data/knowledge_base/raw/law_ca_misleading_marketing.html",
-  "processed_at": "2026-04-09T18:32:50.448265+00:00",
+  "processed_at": "2026-04-10T00:37:03.065183+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_ca_misleading_marketing",
   "source_title": "Canada Competition Bureau - Misleading Representations and Deceptive Marketing",

@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Platform-side branded content disclosure enforcement.",
   "raw_file": "data/knowledge_base/raw/law_it_agcm_meta_case.html",
-  "processed_at": "2026-04-09T18:32:53.537626+00:00",
+  "processed_at": "2026-04-10T00:37:05.850222+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_it_agcm_meta_case",
   "source_title": "Italy AGCM - Meta Instagram influencer case",

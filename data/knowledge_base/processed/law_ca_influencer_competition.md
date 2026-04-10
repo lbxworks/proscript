@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Canada influencer disclosure baseline.",
   "raw_file": "data/knowledge_base/raw/law_ca_influencer_competition.html",
-  "processed_at": "2026-04-09T18:32:50.420913+00:00",
+  "processed_at": "2026-04-10T00:37:03.039011+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_ca_influencer_competition",
   "source_title": "Canada Competition Bureau - Influencer Marketing and the Competition Act",

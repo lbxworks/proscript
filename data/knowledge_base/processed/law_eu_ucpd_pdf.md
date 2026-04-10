@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Primary legal text PDF.",
   "raw_file": "data/knowledge_base/raw/law_eu_ucpd_pdf.pdf",
-  "processed_at": "2026-04-09T18:32:53.495796+00:00",
+  "processed_at": "2026-04-10T00:37:05.810341+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_eu_ucpd_pdf",
   "source_title": "EU - Unfair Commercial Practices Directive PDF",

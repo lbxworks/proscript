@@ -12,7 +12,7 @@
   "priority": "P0",
   "notes": "Required for KOL/creator collaboration disclosure and prohibited industries.",
   "raw_file": "data/knowledge_base/raw/platform_tiktok_branded_content.html",
-  "processed_at": "2026-04-09T18:33:14.087612+00:00",
+  "processed_at": "2026-04-10T00:37:24.817099+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "platform_tiktok_branded_content",
   "source_title": "TikTok Branded Content Policy",

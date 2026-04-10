@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Core misleading advertising definition from consumer code.",
   "raw_file": "data/knowledge_base/raw/law_br_cdc_art_37.html",
-  "processed_at": "2026-04-09T18:32:50.380352+00:00",
+  "processed_at": "2026-04-10T00:37:02.999532+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_br_cdc_art_37",
   "source_title": "Brazil Consumer Code - Misleading Advertising Definition",

@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "Primary competition and unfair marketing law.",
   "raw_file": "data/knowledge_base/raw/law_de_uwg_html.html",
-  "processed_at": "2026-04-09T18:32:50.501439+00:00",
+  "processed_at": "2026-04-10T00:37:03.117188+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_de_uwg_html",
   "source_title": "Germany - Act Against Unfair Competition",

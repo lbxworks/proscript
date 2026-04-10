@@ -13,7 +13,7 @@
   "priority": "P0",
   "notes": "EU-wide baseline for influencer marketing and consumer protection.",
   "raw_file": "data/knowledge_base/raw/law_eu_ucpd_page.html",
-  "processed_at": "2026-04-09T18:32:52.579209+00:00",
+  "processed_at": "2026-04-10T00:37:04.929487+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_eu_ucpd_page",
   "source_title": "EU - Unfair Commercial Practices Directive",

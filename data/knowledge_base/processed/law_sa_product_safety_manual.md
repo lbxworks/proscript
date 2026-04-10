@@ -13,7 +13,7 @@
   "priority": "P2",
   "notes": "Useful for regulated product claims and safety language.",
   "raw_file": "data/knowledge_base/raw/law_sa_product_safety_manual.pdf",
-  "processed_at": "2026-04-09T18:33:12.929971+00:00",
+  "processed_at": "2026-04-10T00:37:23.739478+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_sa_product_safety_manual",
   "source_title": "Saudi Product Safety System Guidance Manual",

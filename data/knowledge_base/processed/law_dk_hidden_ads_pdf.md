@@ -13,7 +13,7 @@
   "priority": "P1",
   "notes": "Detailed report on hidden ads.",
   "raw_file": "data/knowledge_base/raw/law_dk_hidden_ads_pdf.pdf",
-  "processed_at": "2026-04-09T18:32:52.423508+00:00",
+  "processed_at": "2026-04-10T00:37:04.795904+00:00",
   "parser_version": "rag-normalizer-v1",
   "doc_id": "law_dk_hidden_ads_pdf",
   "source_title": "Denmark Consumer Ombudsman - hidden advertising on social media PDF",
