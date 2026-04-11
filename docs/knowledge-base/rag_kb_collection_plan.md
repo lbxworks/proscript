@@ -10,7 +10,7 @@
 4. 哪些可以自动爬取，哪些必须人工补齐。
 5. 这些内容进入 `RAGFlow` 之前应该如何组织。
 
-本方案与已有技术路线文档 [compliance_rag_agent_guide.md](/Users/bailumac/Developer/my-grad-proj/docs/compliance_rag_agent_guide.md) 保持一致。
+本方案与已有技术路线文档 [compliance_rag_agent_guide.md](/Users/bailumac/Developer/my-grad-proj/docs/architecture/compliance_rag_agent_guide.md) 保持一致。
 
 ---
 
@@ -263,7 +263,7 @@ scripts/
 
 - 来源清单：[source_catalog.json](/Users/bailumac/Developer/my-grad-proj/data/knowledge_base/source_catalog.json)
 - 爬虫脚本：[crawl_rag_sources.py](/Users/bailumac/Developer/my-grad-proj/scripts/crawl_rag_sources.py)
-- 采集状态文档：[rag_kb_collection_status.md](/Users/bailumac/Developer/my-grad-proj/docs/rag_kb_collection_status.md)
+- 采集状态文档：[rag_kb_collection_status.md](/Users/bailumac/Developer/my-grad-proj/docs/knowledge-base/rag_kb_collection_status.md)
 
 ---
 

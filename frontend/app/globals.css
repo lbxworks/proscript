@@ -448,6 +448,10 @@ select {
   padding: 18px 18px 0;
 }
 
+.code-panel-body {
+  padding: 18px;
+}
+
 .code-panel pre {
   margin: 0;
   padding: 18px;
@@ -456,6 +460,153 @@ select {
   line-height: 1.7;
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
   font-size: 13px;
+}
+
+.markdown-empty {
+  margin: 0;
+}
+
+.markdown-renderer {
+  color: var(--ink);
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+.markdown-renderer > :first-child {
+  margin-top: 0;
+}
+
+.markdown-renderer > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-renderer h1,
+.markdown-renderer h2,
+.markdown-renderer h3,
+.markdown-renderer h4,
+.markdown-renderer h5,
+.markdown-renderer h6 {
+  margin: 1.1em 0 0.55em;
+  color: var(--ink);
+  font-family: var(--font-heading), sans-serif;
+  line-height: 1.2;
+}
+
+.markdown-renderer h1 {
+  font-size: 28px;
+}
+
+.markdown-renderer h2 {
+  font-size: 24px;
+}
+
+.markdown-renderer h3 {
+  font-size: 20px;
+}
+
+.markdown-renderer h4,
+.markdown-renderer h5,
+.markdown-renderer h6 {
+  font-size: 17px;
+}
+
+.markdown-renderer p,
+.markdown-renderer ul,
+.markdown-renderer ol,
+.markdown-renderer blockquote,
+.markdown-renderer hr {
+  margin: 0 0 1em;
+}
+
+.markdown-renderer ul,
+.markdown-renderer ol {
+  padding-left: 1.4em;
+}
+
+.markdown-renderer li + li {
+  margin-top: 0.35em;
+}
+
+.markdown-renderer strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.markdown-renderer code {
+  padding: 0.12em 0.38em;
+  border-radius: 8px;
+  background: rgba(21, 34, 32, 0.08);
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 0.92em;
+}
+
+.markdown-renderer pre {
+  margin: 0 0 1em;
+  padding: 16px;
+  overflow-x: auto;
+  border-radius: 16px;
+  background: rgba(18, 25, 24, 0.94);
+  color: rgba(255, 250, 245, 0.96);
+  white-space: pre;
+  word-break: normal;
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.markdown-renderer pre code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.markdown-renderer blockquote {
+  padding: 12px 16px;
+  border-left: 4px solid rgba(255, 122, 0, 0.45);
+  background: rgba(255, 122, 0, 0.06);
+  color: var(--muted);
+}
+
+.markdown-renderer hr {
+  border: 0;
+  border-top: 1px solid rgba(23, 33, 31, 0.1);
+}
+
+.markdown-link {
+  color: var(--secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdown-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 0 0 1em;
+  border: 1px solid rgba(23, 33, 31, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.markdown-renderer table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.markdown-renderer thead {
+  background: rgba(255, 122, 0, 0.08);
+}
+
+.markdown-renderer th,
+.markdown-renderer td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(23, 33, 31, 0.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-renderer tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .issue-topline {
@@ -823,6 +974,225 @@ select {
   background: rgba(183, 63, 55, 0.16);
 }
 
+.panel-card-disabled {
+  opacity: 0.52;
+  pointer-events: none;
+}
+
+.workflow-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.workflow-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.workflow-caption {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.workflow-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.workflow-progress-chip {
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(255, 140, 26, 0.14);
+  color: #9a4b00;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.workflow-cancel-button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.workflow-stepper {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.workflow-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 124px;
+}
+
+.workflow-step-with-line::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: calc(42px + 18px);
+  width: calc(100% - 6px);
+  border-top: 1px dashed rgba(156, 163, 175, 0.6);
+  z-index: 0;
+}
+
+.workflow-step.workflow-step-completed.workflow-step-with-line::after,
+.workflow-step.workflow-step-active.workflow-step-with-line::after {
+  border-top-style: solid;
+  border-top-color: rgba(255, 140, 26, 0.5);
+}
+
+.workflow-step-marker {
+  position: relative;
+  z-index: 1;
+}
+
+.workflow-step-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 2px solid rgba(209, 213, 219, 1);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: transparent;
+  font-weight: 800;
+}
+
+.workflow-step-body {
+  position: relative;
+  z-index: 1;
+  padding-right: 8px;
+}
+
+.workflow-step-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.workflow-step-title-row h4 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+
+.workflow-step-duration,
+.workflow-step-note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.workflow-step-message,
+.workflow-step-error-copy {
+  margin-top: 10px;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 44px;
+}
+
+.workflow-step-error-copy {
+  color: #b73f37;
+}
+
+.workflow-caret {
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: 2px;
+  background: currentColor;
+  animation: workflow-caret-blink 1s steps(1) infinite;
+  vertical-align: -2px;
+}
+
+.workflow-step-active .workflow-step-dot {
+  border-color: rgba(255, 140, 26, 0.72);
+  background: linear-gradient(135deg, #ff8c1a 0%, #ffb347 100%);
+  animation: pulse-glow 2s infinite;
+}
+
+.workflow-step-active .workflow-step-title-row h4,
+.workflow-step-completed .workflow-step-title-row h4 {
+  color: #111827;
+  font-weight: 800;
+}
+
+.workflow-step-completed .workflow-step-dot {
+  border-color: rgba(255, 140, 26, 0.72);
+  background: linear-gradient(135deg, #ff8c1a 0%, #ffb347 100%);
+  color: #fff;
+}
+
+.workflow-step-error .workflow-step-dot {
+  border-color: rgba(183, 63, 55, 0.88);
+  background: #ef4444;
+  color: #fff;
+}
+
+.workflow-step-error .workflow-step-title-row h4 {
+  color: #ef4444;
+  font-weight: 800;
+}
+
+.workflow-step-skipped .workflow-step-dot {
+  border-style: dashed;
+  background: transparent;
+}
+
+.workflow-step-skipped .workflow-step-title-row h4 {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.workflow-error-card {
+  border-radius: 22px;
+  border: 1px solid rgba(183, 63, 55, 0.16);
+  background: rgba(183, 63, 55, 0.08);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workflow-error-card h4,
+.workflow-error-card p {
+  margin: 0;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 26, 0.36);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 140, 26, 0);
+  }
+}
+
+@keyframes workflow-caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 1100px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -839,7 +1209,32 @@ select {
   .industry-grid,
   .metric-grid,
   .two-column-fields,
-  .checkbox-grid {
+  .checkbox-grid,
+  .workflow-stepper {
     grid-template-columns: 1fr;
+  }
+
+  .workflow-step {
+    min-height: auto;
+  }
+
+  .workflow-step-with-line::after {
+    top: auto;
+    bottom: -10px;
+    left: 18px;
+    width: 1px;
+    height: 22px;
+    border-top: none;
+    border-left: 1px dashed rgba(156, 163, 175, 0.6);
+  }
+
+  .workflow-step.workflow-step-completed.workflow-step-with-line::after,
+  .workflow-step.workflow-step-active.workflow-step-with-line::after {
+    border-left-style: solid;
+    border-left-color: rgba(255, 140, 26, 0.5);
+  }
+
+  .workflow-head {
+    flex-direction: column;
   }
 }

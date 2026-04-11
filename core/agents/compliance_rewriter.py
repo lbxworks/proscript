@@ -5,13 +5,14 @@ import json
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.prompts import SYSTEM_PROMPT_COMPLIANCE_REWRITER
+from core.script_cleanup import sanitize_script_markdown
 from utils.llm_client import get_llm, validate_markdown_table_response, validate_non_empty_response
 
 
 def run_compliance_rewriter(state: dict) -> dict:
     print("✍️ [Agent] Compliance Rewriter — Producing a safer revision when the review flags issues...")
 
-    final_script = str(state.get("final_script", "") or "")
+    final_script = sanitize_script_markdown(state.get("final_script", ""))
     report = state.get("compliance_report", {}) or {}
     issues = report.get("issues", []) or []
     overall_status = str(report.get("overall_status", "needs_revision")).lower()
@@ -49,7 +50,7 @@ Return the revised markdown script only.
             validator=validate_markdown_table_response,
         )
         response = llm.invoke(messages)
-        approved_script = str(response.content).strip() or final_script
+        approved_script = sanitize_script_markdown(response.content) or final_script
     except Exception as exc:
         print(f"⚠️ [Compliance Rewriter] Strict markdown validation failed, retrying relaxed validation: {exc}")
         try:
@@ -59,7 +60,7 @@ Return the revised markdown script only.
                 validator=validate_non_empty_response,
             )
             relaxed_response = relaxed_llm.invoke(messages)
-            approved_script = str(relaxed_response.content).strip() or final_script
+            approved_script = sanitize_script_markdown(relaxed_response.content) or final_script
         except Exception as retry_exc:
             print(f"❌ [Compliance Rewriter] Rewrite failed: {retry_exc}")
             approved_script = final_script

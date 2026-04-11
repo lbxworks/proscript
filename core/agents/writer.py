@@ -1,5 +1,6 @@
 # core/agents/writer.py
 from langchain_core.messages import SystemMessage, HumanMessage
+from core.script_cleanup import sanitize_script_markdown
 from utils.llm_client import (
     get_last_llm_invocation,
     get_llm,
@@ -82,7 +83,7 @@ Output the full sequence of Markdown shooting scripts now. Do NOT skip any scene
             HumanMessage(content=user_prompt),
         ]
         response = llm.invoke(messages)
-        final_script = response.content
+        final_script = sanitize_script_markdown(response.content)
         llm_meta = get_last_llm_invocation()
         print(f"✅ [Writer Agent] Multi-language script sequence generated ({language_count} languages).")
     except Exception as e:
@@ -94,7 +95,7 @@ Output the full sequence of Markdown shooting scripts now. Do NOT skip any scene
                 validator=validate_non_empty_response,
             )
             relaxed_response = relaxed_llm.invoke(messages)
-            final_script = relaxed_response.content
+            final_script = sanitize_script_markdown(relaxed_response.content)
             llm_meta = get_last_llm_invocation()
             print("✅ [Writer Agent] Script generated via relaxed validation fallback.")
         except Exception as retry_error:

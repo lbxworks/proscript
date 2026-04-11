@@ -1,8 +1,17 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { getTrends } from "@/lib/api";
+import { MarkdownContent } from "@/components/ui/markdown-content";
+import {
+  WorkflowStepper,
+  applyWorkflowProgress,
+  createWorkflowSteps,
+  markActiveWorkflowStepError,
+  type WorkflowStepDefinition,
+  type WorkflowStepState,
+} from "@/components/shared/workflow-stepper";
+import { streamTrends, WorkflowStreamAbortedError, WorkflowStreamTimeoutError } from "@/lib/api";
 import {
   DISTRIBUTION_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -11,7 +20,6 @@ import {
   PRODUCT_OPTIONS,
 } from "@/lib/constants";
 import type { IndustryInsight, TrendBenchmark, TrendModuleMeta, TrendsResponse } from "@/lib/schemas";
-
 
 const defaultFilters = {
   topic: "",
@@ -23,6 +31,24 @@ const defaultFilters = {
 };
 
 type LoadMode = "cache" | "videos" | "industry";
+
+const TREND_STEP_DEFINITIONS: WorkflowStepDefinition[] = [
+  {
+    key: "video_search",
+    title: "步骤 1：全球热门视频搜索",
+    messages: ["连接 Tavily 数据网络...", "扫描平台爆款对标视频..."],
+  },
+  {
+    key: "industry_scan",
+    title: "步骤 2：三大行业情报扫描",
+    messages: ["获取科技行业最新动态...", "追踪视频行业变化...", "分析营销行业趋势..."],
+  },
+  {
+    key: "trend_summary",
+    title: "步骤 3：Villy 深度趋势解读",
+    messages: ["AI 正在阅读并提炼所有情报...", "生成可执行的趋势洞察..."],
+  },
+];
 
 function formatTimestamp(value?: string) {
   if (!value) {
@@ -155,6 +181,9 @@ export function TrendsWorkspace() {
   const [result, setResult] = useState<TrendsResponse | null>(null);
   const [error, setError] = useState("");
   const [copiedUrl, setCopiedUrl] = useState("");
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowStepState[] | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   async function copyVideoLink(url: string) {
     try {
@@ -180,24 +209,64 @@ export function TrendsWorkspace() {
     setFilters({ ...filters, target_languages: nextLanguages });
   }
 
-  function fetchData(mode: LoadMode) {
+  async function runWorkflow(mode: LoadMode) {
     setError("");
     setPendingMode(mode);
+    setWorkflowSteps(createWorkflowSteps(TREND_STEP_DEFINITIONS));
 
-    startTransition(async () => {
-      try {
-        const response = await getTrends({
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const response = await streamTrends(
+        {
           ...filters,
           refresh_videos: mode === "videos",
           refresh_industry: mode === "industry",
-        });
+        },
+        {
+          signal: controller.signal,
+          onProgress: (event) => {
+            setWorkflowSteps((current) => applyWorkflowProgress(current || createWorkflowSteps(TREND_STEP_DEFINITIONS), event));
+          },
+          onError: (event) => {
+            setWorkflowSteps((current) =>
+              applyWorkflowProgress(current || createWorkflowSteps(TREND_STEP_DEFINITIONS), {
+                step: event.step,
+                status: "error",
+                message: event.message,
+              }),
+            );
+          },
+        },
+      );
+
+      window.setTimeout(() => {
         setResult(response);
-      } catch (requestError) {
-        setError(requestError instanceof Error ? requestError.message : "获取热点失败");
-      } finally {
+        setWorkflowSteps(null);
         setPendingMode(null);
+      }, 300);
+    } catch (requestError) {
+      setPendingMode(null);
+
+      if (requestError instanceof WorkflowStreamAbortedError) {
+        setWorkflowSteps(null);
+        setError("本次热点探索已取消。");
+      } else if (requestError instanceof WorkflowStreamTimeoutError) {
+        setWorkflowSteps((current) =>
+          current ? markActiveWorkflowStepError(current, "Villy 思考了太久，可能遇到了意外情况。") : current,
+        );
+        setError("Villy 思考了太久，可能遇到了意外情况。请重新开始。");
+      } else {
+        setError(requestError instanceof Error ? requestError.message : "获取热点失败");
       }
-    });
+    } finally {
+      abortControllerRef.current = null;
+    }
+  }
+
+  function fetchData(mode: LoadMode) {
+    void runWorkflow(mode);
   }
 
   useEffect(() => {
@@ -205,9 +274,13 @@ export function TrendsWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function cancelWorkflow() {
+    abortControllerRef.current?.abort();
+  }
+
   return (
     <div className="dashboard-grid">
-      <section className="panel-card panel-card-tight">
+      <section className={`panel-card panel-card-tight ${pendingMode !== null ? "panel-card-disabled" : ""}`}>
         <div className="section-header">
           <div>
             <p className="section-kicker">Discovery</p>
@@ -218,6 +291,7 @@ export function TrendsWorkspace() {
         <label className="field">
           <span>主题关键词</span>
           <input
+            disabled={pendingMode !== null}
             placeholder="例如：折叠屏、AI 眼镜、跨境美妆"
             value={filters.topic}
             onChange={(event) => setFilters({ ...filters, topic: event.target.value })}
@@ -231,6 +305,7 @@ export function TrendsWorkspace() {
               <label key={language} className="check-card">
                 <input
                   checked={filters.target_languages.includes(language)}
+                  disabled={pendingMode !== null}
                   onChange={() => toggleLanguage(language)}
                   type="checkbox"
                 />
@@ -244,6 +319,7 @@ export function TrendsWorkspace() {
           <label className="field">
             <span>国家</span>
             <select
+              disabled={pendingMode !== null}
               value={filters.target_country}
               onChange={(event) => setFilters({ ...filters, target_country: event.target.value })}
             >
@@ -257,6 +333,7 @@ export function TrendsWorkspace() {
           <label className="field">
             <span>平台</span>
             <select
+              disabled={pendingMode !== null}
               value={filters.target_platform}
               onChange={(event) => setFilters({ ...filters, target_platform: event.target.value })}
             >
@@ -270,6 +347,7 @@ export function TrendsWorkspace() {
           <label className="field">
             <span>分发方式</span>
             <select
+              disabled={pendingMode !== null}
               value={filters.distribution_mode}
               onChange={(event) => setFilters({ ...filters, distribution_mode: event.target.value })}
             >
@@ -283,6 +361,7 @@ export function TrendsWorkspace() {
           <label className="field">
             <span>品类</span>
             <select
+              disabled={pendingMode !== null}
               value={filters.product_category}
               onChange={(event) => setFilters({ ...filters, product_category: event.target.value })}
             >
@@ -311,89 +390,109 @@ export function TrendsWorkspace() {
         {error ? <p className="error-copy">{error}</p> : null}
       </section>
 
-      <section className="panel-card">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Industry</p>
-            <h3>行业情报摘要</h3>
-          </div>
-          <div className="module-actions">
-            <ModuleMetaBadge meta={result?.industry} emptyCopy="尚未加载" />
-            <button
-              className="secondary-button section-button"
-              disabled={pendingMode !== null}
-              onClick={() => fetchData("industry")}
-              type="button"
-            >
-              {pendingMode === "industry" ? "刷新中..." : "刷新行业情报"}
-            </button>
-          </div>
-        </div>
-        <article className="note-card">
-          <h4>主题趋势摘要</h4>
-          <p className="muted-copy">
-            最近更新时间：{formatTimestamp(result?.industry.cached_at)} {result?.industry.stale ? "· 当前是缓存兜底结果" : ""}
-          </p>
-          <p>{result?.industry.topic_brief.trend_query || "未填写主题时只展示行业情报与热点视频。"}</p>
-        </article>
-        <article className="code-panel">
-          <pre>{result?.industry.topic_brief.trend_data || ""}</pre>
-        </article>
-      </section>
+      {workflowSteps ? (
+        <section className="panel-card full-span">
+          <WorkflowStepper
+            caption="热点视频、行业情报和趋势解读会按阶段依次返回。"
+            cancelLabel="取消探索"
+            onCancel={cancelWorkflow}
+            onRetry={() => fetchData(pendingMode || "cache")}
+            steps={workflowSteps}
+            title="热点探索实时进度"
+          />
+        </section>
+      ) : (
+        <>
+          <section className="panel-card">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Industry</p>
+                <h3>行业情报摘要</h3>
+              </div>
+              <div className="module-actions">
+                <ModuleMetaBadge meta={result?.industry} emptyCopy="尚未加载" />
+                <button
+                  className="secondary-button section-button"
+                  disabled={pendingMode !== null}
+                  onClick={() => fetchData("industry")}
+                  type="button"
+                >
+                  {pendingMode === "industry" ? "刷新中..." : "刷新行业情报"}
+                </button>
+              </div>
+            </div>
+            <article className="note-card">
+              <h4>主题趋势摘要</h4>
+              <p className="muted-copy">
+                最近更新时间：{formatTimestamp(result?.industry.cached_at)} {result?.industry.stale ? "· 当前是缓存兜底结果" : ""}
+              </p>
+              <p>{result?.industry.topic_brief.trend_query || "未填写主题时只展示行业情报与热点视频。"}</p>
+            </article>
+            <article className="code-panel">
+              <div className="code-panel-body">
+                <MarkdownContent
+                  content={result?.industry.topic_brief.trend_data || ""}
+                  emptyText="这里会显示主题趋势摘要。"
+                />
+              </div>
+            </article>
+          </section>
 
-      <section className="panel-card full-span">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Videos</p>
-            <h3>合适的视频</h3>
-          </div>
-          <div className="module-actions">
-            <ModuleMetaBadge meta={result?.videos} emptyCopy="尚未加载" />
-            <button
-              className="secondary-button section-button"
-              disabled={pendingMode !== null}
-              onClick={() => fetchData("videos")}
-              type="button"
-            >
-              {pendingMode === "videos" ? "刷新中..." : "刷新热点视频"}
-            </button>
-          </div>
-        </div>
-        <p className="muted-copy">
-          最近更新时间：{formatTimestamp(result?.videos.cached_at)} {result?.videos.stale ? "· 刷新失败时自动保留上一次结果" : ""}
-        </p>
-        {result?.videos.error ? <p className="error-copy">{result.videos.error}</p> : null}
-        <div className="video-grid">
-          {(result?.videos.items || []).map((item) => (
-            <VideoCard key={item.url} copied={copiedUrl === item.url} item={item} onCopy={copyVideoLink} />
-          ))}
-        </div>
-        {result?.videos.items?.length ? null : (
-          <article className="empty-state">
-            <p>当前没有返回可展示的视频样本，可以调整主题后再刷新一次。</p>
-          </article>
-        )}
-      </section>
+          <section className="panel-card full-span">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Videos</p>
+                <h3>合适的视频</h3>
+              </div>
+              <div className="module-actions">
+                <ModuleMetaBadge meta={result?.videos} emptyCopy="尚未加载" />
+                <button
+                  className="secondary-button section-button"
+                  disabled={pendingMode !== null}
+                  onClick={() => fetchData("videos")}
+                  type="button"
+                >
+                  {pendingMode === "videos" ? "刷新中..." : "刷新热点视频"}
+                </button>
+              </div>
+            </div>
+            <p className="muted-copy">
+              最近更新时间：{formatTimestamp(result?.videos.cached_at)} {result?.videos.stale ? "· 刷新失败时自动保留上一次结果" : ""}
+            </p>
+            {result?.videos.error ? <p className="error-copy">{result.videos.error}</p> : null}
+            <div className="video-grid">
+              {(result?.videos.items || []).map((item) => (
+                <VideoCard key={item.url} copied={copiedUrl === item.url} item={item} onCopy={copyVideoLink} />
+              ))}
+            </div>
+            {result?.videos.items?.length ? null : (
+              <article className="empty-state">
+                <p>当前没有返回可展示的视频样本，可以调整主题后再刷新一次。</p>
+              </article>
+            )}
+          </section>
 
-      <section className="panel-card full-span">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Industry Signals</p>
-            <h3>科技、视频、营销行业信息</h3>
-          </div>
-        </div>
-        {result?.industry.error ? <p className="error-copy">{result.industry.error}</p> : null}
-        <div className="industry-grid">
-          {(result?.industry.categories || []).map((item) => (
-            <IndustryCard key={item.key} item={item} />
-          ))}
-        </div>
-        {result?.industry.categories?.length ? null : (
-          <article className="empty-state">
-            <p>当前没有缓存到行业情报，点“刷新行业情报”后会实时抓取科技、视频和营销三类内容。</p>
-          </article>
-        )}
-      </section>
+          <section className="panel-card full-span">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Industry Signals</p>
+                <h3>科技、视频、营销行业信息</h3>
+              </div>
+            </div>
+            {result?.industry.error ? <p className="error-copy">{result.industry.error}</p> : null}
+            <div className="industry-grid">
+              {(result?.industry.categories || []).map((item) => (
+                <IndustryCard key={item.key} item={item} />
+              ))}
+            </div>
+            {result?.industry.categories?.length ? null : (
+              <article className="empty-state">
+                <p>当前没有缓存到行业情报，点“刷新行业情报”后会实时抓取科技、视频和营销三类内容。</p>
+              </article>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }

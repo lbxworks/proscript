@@ -52,6 +52,22 @@ export type TrendModuleMeta = {
   stale: boolean;
 };
 
+export type WorkflowStepStatus = "pending" | "active" | "completed" | "error" | "skipped";
+
+export type WorkflowProgressEvent = {
+  step: string;
+  status: WorkflowStepStatus;
+  message: string;
+  duration_ms?: number;
+};
+
+export type WorkflowErrorEvent = {
+  step: string;
+  status: "error";
+  error_type: string;
+  message: string;
+};
+
 export type IndustryArticle = {
   title: string;
   url: string;

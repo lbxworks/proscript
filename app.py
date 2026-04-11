@@ -2,10 +2,10 @@
 from datetime import datetime
 import html
 import os
-import sqlite3
 import threading
 from urllib.parse import urlparse
 import streamlit as st
+from backend.db import list_users_for_legacy_ui, save_script_record
 from core.compliance_config import MARKETS, get_region_for_country
 from core.compliance_kb import (
     get_knowledge_index_status,
@@ -16,7 +16,6 @@ from core.compliance_kb import (
 from core.workflow import build_workflow
 from utils.tavily_client import search_viral_video_benchmarks
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'app.db')
 LANG_OPTIONS = {"简体中文": "zh", "English": "en", "Español": "es"}
 
 # =====================================================================
@@ -161,7 +160,7 @@ UI_STRINGS = {
         "status_done": "✅ Shooting Script Generated Successfully",
         "status_error": "❌ Pipeline Error",
         "output_title": "🎬 Professional Shooting Script",
-        "save_success": "✅ Script saved to local database (app.db)",
+        "save_success": "✅ Script saved to the database",
         # Gallery
         "section_viral": "🔥 Viral Tech Video Benchmarks",
         "section_viral_subtitle": "Live Tavily scan of public {scope} posts from the last 3 days in {country}. Only results with 1M+ view signals are shown.",
@@ -323,7 +322,7 @@ UI_STRINGS = {
         "status_done": "✅ 拍摄脚本生成成功",
         "status_error": "❌ 流水线错误",
         "output_title": "🎬 专业拍摄脚本",
-        "save_success": "✅ 脚本已保存至本地数据库 (app.db)",
+        "save_success": "✅ 脚本已保存至数据库",
         # Gallery
         "section_viral": "🔥 近三天科技热视频基准",
         "section_viral_subtitle": "通过 Tavily 实时扫描 {country} 市场近 3 天内的公开 {scope} 内容，仅展示检测到 100 万以上播放信号的视频结果。",
@@ -485,7 +484,7 @@ UI_STRINGS = {
         "status_done": "✅ Guion de Rodaje Generado Exitosamente",
         "status_error": "❌ Error en el Pipeline",
         "output_title": "🎬 Guion Profesional de Rodaje",
-        "save_success": "✅ Guion guardado en la base de datos local (app.db)",
+        "save_success": "✅ Guion guardado en la base de datos",
         # Gallery
         "section_viral": "🔥 Referencias de videos virales tech",
         "section_viral_subtitle": "Escaneo en vivo con Tavily de publicaciones públicas de {scope} en {country} durante los últimos 3 días. Solo se muestran resultados con señales de más de 1M de vistas.",
@@ -515,30 +514,20 @@ UI_STRINGS = {
 # Helper Functions
 # =====================================================================
 def get_users():
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, name, style_prompt FROM users")
-        users = cursor.fetchall()
-        conn.close()
-        return users
-    except:
-        return []
+    return list_users_for_legacy_ui()
 
 def save_script(user_id, topic, platform, duration, creativity, lang, content):
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO scripts (user_id, topic, platform, duration, creativity, language, content)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (user_id, topic, platform, duration, creativity, lang, content))
-        conn.commit()
-    except Exception as e:
-        print(f"❌ DB Save Error: {e}")
-    finally:
-        if 'conn' in locals():
-            conn.close()
+    record_id = save_script_record(
+        user_id=user_id,
+        topic=topic,
+        platform=platform,
+        duration=duration,
+        creativity=creativity,
+        language=lang,
+        content=content,
+    )
+    if record_id is None:
+        print("❌ DB Save Error: failed to save script record")
 
 
 def format_citation(item: dict) -> str:

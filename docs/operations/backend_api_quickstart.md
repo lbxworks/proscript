@@ -1,10 +1,24 @@
 # Backend API Quickstart
 
+## 数据库前提
+
+- 当前后端默认使用 PostgreSQL 作为唯一业务库
+- 建议先运行 `./scripts/start_backend.sh`
+- 如果你手动启动后端，请先执行 `alembic upgrade head`
+
 ## 启动方式
 
 在项目根目录运行：
 
 ```bash
+./scripts/start_backend.sh
+```
+
+或手动执行：
+
+```bash
+source venv/bin/activate
+alembic upgrade head
 uvicorn backend.main:app --reload
 ```
 

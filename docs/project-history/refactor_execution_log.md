@@ -25,7 +25,7 @@
 - 已新增图书馆健康检查服务 [backend/services/library.py](/Users/bailumac/Developer/my-grad-proj/backend/services/library.py)。
 - 已新增达人服务 [backend/services/talents.py](/Users/bailumac/Developer/my-grad-proj/backend/services/talents.py)。
 - 已新增数据库辅助层 [backend/db.py](/Users/bailumac/Developer/my-grad-proj/backend/db.py)。
-- 已补充后端启动说明 [docs/backend_api_quickstart.md](/Users/bailumac/Developer/my-grad-proj/docs/backend_api_quickstart.md)。
+- 已补充后端启动说明 [docs/operations/backend_api_quickstart.md](/Users/bailumac/Developer/my-grad-proj/docs/operations/backend_api_quickstart.md)。
 - 已验证 5 个后端接口可用。
 - 已新增 `frontend/` 前端工程，并采用 Next.js App Router 结构。
 - 已完成 5 个一级菜单页面骨架与统一布局。

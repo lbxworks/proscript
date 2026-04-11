@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
+from backend.database import ensure_database_schema
 from backend.schemas import GenerateScriptRequest, ReviewScriptRequest, TalentMutationRequest
 from backend.services.library import (
     get_library_health,
@@ -10,9 +12,10 @@ from backend.services.library import (
     rebuild_library,
     upload_library_document,
 )
-from backend.services.scripts import generate_script, review_script
+from backend.services.scripts import generate_script, review_script, stream_generate_script, stream_review_script
+from backend.services.streaming import stream_task
 from backend.services.talents import create_talent, get_talents, remove_talent, update_talent
-from backend.services.trends import explore_trends
+from backend.services.trends import explore_trends, stream_explore_trends
 
 
 app = FastAPI(
@@ -28,6 +31,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _sse_headers() -> dict[str, str]:
+    return {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
+
+
+@app.on_event("startup")
+def startup_initialize_database() -> None:
+    ensure_database_schema()
 
 
 @app.get("/health")
@@ -83,12 +99,30 @@ def generate_script_endpoint(payload: GenerateScriptRequest):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+@app.post("/scripts/generate/stream")
+async def generate_script_stream_endpoint(request: Request, payload: GenerateScriptRequest):
+    return StreamingResponse(
+        stream_task(request=request, worker=lambda emit: stream_generate_script(payload, emit)),
+        media_type="text/event-stream",
+        headers=_sse_headers(),
+    )
+
+
 @app.post("/scripts/review")
 def review_script_endpoint(payload: ReviewScriptRequest):
     try:
         return review_script(payload)
     except Exception as exc:  # pragma: no cover - exercised through integration runs
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/scripts/review/stream")
+async def review_script_stream_endpoint(request: Request, payload: ReviewScriptRequest):
+    return StreamingResponse(
+        stream_task(request=request, worker=lambda emit: stream_review_script(payload, emit)),
+        media_type="text/event-stream",
+        headers=_sse_headers(),
+    )
 
 
 @app.get("/trends")
@@ -115,6 +149,38 @@ def trends_endpoint(
         )
     except Exception as exc:  # pragma: no cover - exercised through integration runs
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get("/trends/stream")
+async def trends_stream_endpoint(
+    request: Request,
+    topic: str | None = None,
+    target_country: str = "US",
+    target_platform: str = "tiktok",
+    distribution_mode: str = "branded_content",
+    product_category: str = "general",
+    target_languages: list[str] = Query(default=["English"]),
+    refresh_videos: bool = False,
+    refresh_industry: bool = False,
+):
+    return StreamingResponse(
+        stream_task(
+            request=request,
+            worker=lambda emit: stream_explore_trends(
+                topic=topic,
+                target_country=target_country,
+                target_platform=target_platform,
+                distribution_mode=distribution_mode,
+                product_category=product_category,
+                target_languages=target_languages,
+                refresh_videos=refresh_videos,
+                refresh_industry=refresh_industry,
+                emit=emit,
+            ),
+        ),
+        media_type="text/event-stream",
+        headers=_sse_headers(),
+    )
 
 
 @app.get("/library/health")

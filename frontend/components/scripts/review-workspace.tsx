@@ -1,8 +1,17 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
-import { getTalents, reviewScript } from "@/lib/api";
+import { MarkdownContent } from "@/components/ui/markdown-content";
+import {
+  WorkflowStepper,
+  applyWorkflowProgress,
+  createWorkflowSteps,
+  markActiveWorkflowStepError,
+  type WorkflowStepDefinition,
+  type WorkflowStepState,
+} from "@/components/shared/workflow-stepper";
+import { getTalents, streamReviewScript, WorkflowStreamAbortedError, WorkflowStreamTimeoutError } from "@/lib/api";
 import {
   DISTRIBUTION_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -31,6 +40,19 @@ const defaultForm: ReviewScriptRequest = {
   brand_id: "default",
   style_prompt: "",
 };
+
+const REVIEW_STEP_DEFINITIONS: WorkflowStepDefinition[] = [
+  {
+    key: "compliance_scan",
+    title: "步骤 1：全面合规扫描与问题诊断",
+    messages: ["定位适用法律法规...", "检索合规知识库...", "逐条对比政策红线..."],
+  },
+  {
+    key: "compliance_fix",
+    title: "步骤 2：智能合规修订",
+    messages: ["正在修正风险表述...", "优化敏感词替换...", "生成建议修订稿..."],
+  },
+];
 
 function CitationList({ citations }: { citations: ComplianceCitation[] }) {
   if (!citations.length) {
@@ -135,6 +157,9 @@ export function ReviewWorkspace() {
   const [result, setResult] = useState<ReviewScriptResponse | null>(null);
   const [error, setError] = useState("");
   const [talents, setTalents] = useState<TalentProfile[]>([]);
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowStepState[] | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const selectedTalent = useMemo(
     () => talents.find((talent) => talent.user_id === form.user_id) || talents[0] || null,
@@ -178,24 +203,66 @@ export function ReviewWorkspace() {
     loadTalents();
   }, []);
 
-  function submit() {
+  async function runWorkflow() {
     setError("");
     setPending(true);
-    startTransition(async () => {
-      try {
-        const response = await reviewScript(form);
+    setWorkflowSteps(createWorkflowSteps(REVIEW_STEP_DEFINITIONS));
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const response = await streamReviewScript(form, {
+        signal: controller.signal,
+        onProgress: (event) => {
+          setWorkflowSteps((current) => applyWorkflowProgress(current || createWorkflowSteps(REVIEW_STEP_DEFINITIONS), event));
+        },
+        onError: (event) => {
+          setWorkflowSteps((current) =>
+            applyWorkflowProgress(current || createWorkflowSteps(REVIEW_STEP_DEFINITIONS), {
+              step: event.step,
+              status: "error",
+              message: event.message,
+            }),
+          );
+        },
+      });
+
+      window.setTimeout(() => {
         setResult(response);
-      } catch (requestError) {
-        setError(requestError instanceof Error ? requestError.message : "检查失败");
-      } finally {
+        setWorkflowSteps(null);
         setPending(false);
+      }, 300);
+    } catch (requestError) {
+      setPending(false);
+
+      if (requestError instanceof WorkflowStreamAbortedError) {
+        setWorkflowSteps(null);
+        setError("本次审核已取消。");
+      } else if (requestError instanceof WorkflowStreamTimeoutError) {
+        setWorkflowSteps((current) =>
+          current ? markActiveWorkflowStepError(current, "Villy 思考了太久，可能遇到了意外情况。") : current,
+        );
+        setError("Villy 思考了太久，可能遇到了意外情况。请重新开始。");
+      } else {
+        setError(requestError instanceof Error ? requestError.message : "检查失败");
       }
-    });
+    } finally {
+      abortControllerRef.current = null;
+    }
+  }
+
+  function submit() {
+    void runWorkflow();
+  }
+
+  function cancelWorkflow() {
+    abortControllerRef.current?.abort();
   }
 
   return (
     <div className="dashboard-grid">
-      <section className="panel-card panel-card-tight">
+      <section className={`panel-card panel-card-tight ${pending ? "panel-card-disabled" : ""}`}>
         <div className="section-header">
           <div>
             <p className="section-kicker">Review</p>
@@ -206,6 +273,7 @@ export function ReviewWorkspace() {
         <label className="field">
           <span>达人选择</span>
           <select
+            disabled={pending}
             value={selectedTalent?.user_id ?? form.user_id ?? 0}
             onChange={(event) => setForm({ ...form, user_id: Number(event.target.value) || undefined })}
           >
@@ -235,12 +303,17 @@ export function ReviewWorkspace() {
 
         <label className="field">
           <span>审查主题</span>
-          <input value={form.topic || ""} onChange={(event) => setForm({ ...form, topic: event.target.value })} />
+          <input
+            disabled={pending}
+            value={form.topic || ""}
+            onChange={(event) => setForm({ ...form, topic: event.target.value })}
+          />
         </label>
 
         <label className="field">
           <span>脚本内容</span>
           <textarea
+            disabled={pending}
             value={form.script}
             onChange={(event) => setForm({ ...form, script: event.target.value })}
             rows={12}
@@ -254,6 +327,7 @@ export function ReviewWorkspace() {
               <label key={language} className="check-card">
                 <input
                   checked={form.target_languages.includes(language)}
+                  disabled={pending}
                   onChange={() => toggleLanguage(language)}
                   type="checkbox"
                 />
@@ -267,6 +341,7 @@ export function ReviewWorkspace() {
           <label className="field">
             <span>国家</span>
             <select
+              disabled={pending}
               value={form.target_country}
               onChange={(event) => setForm({ ...form, target_country: event.target.value })}
             >
@@ -280,6 +355,7 @@ export function ReviewWorkspace() {
           <label className="field">
             <span>平台</span>
             <select
+              disabled={pending}
               value={form.target_platform}
               onChange={(event) => setForm({ ...form, target_platform: event.target.value })}
             >
@@ -293,6 +369,7 @@ export function ReviewWorkspace() {
           <label className="field">
             <span>分发方式</span>
             <select
+              disabled={pending}
               value={form.distribution_mode}
               onChange={(event) => setForm({ ...form, distribution_mode: event.target.value })}
             >
@@ -306,6 +383,7 @@ export function ReviewWorkspace() {
           <label className="field">
             <span>品类</span>
             <select
+              disabled={pending}
               value={form.product_category}
               onChange={(event) => setForm({ ...form, product_category: event.target.value })}
             >
@@ -319,6 +397,7 @@ export function ReviewWorkspace() {
           <label className="field">
             <span>品牌 ID</span>
             <input
+              disabled={pending}
               value={form.brand_id}
               onChange={(event) => setForm({ ...form, brand_id: event.target.value })}
             />
@@ -331,47 +410,67 @@ export function ReviewWorkspace() {
         {error ? <p className="error-copy">{error}</p> : null}
       </section>
 
-      <section className="panel-card">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Report</p>
-            <h3>风险报告</h3>
-          </div>
-        </div>
-        <ReportView report={result?.final_state.compliance_report} />
-      </section>
+      {workflowSteps ? (
+        <section className="panel-card full-span">
+          <WorkflowStepper
+            caption="风险定位、证据检索和改写建议会按阶段实时推进。"
+            cancelLabel="取消审核"
+            onCancel={cancelWorkflow}
+            onRetry={submit}
+            steps={workflowSteps}
+            title="脚本审核实时进度"
+          />
+        </section>
+      ) : (
+        <>
+          <section className="panel-card">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Report</p>
+                <h3>风险报告</h3>
+              </div>
+            </div>
+            <ReportView report={result?.final_state.compliance_report} />
+          </section>
 
-      <section className="panel-card full-span">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Rewrite</p>
-            <h3>建议修订稿</h3>
-          </div>
-        </div>
-        <article className="code-panel">
-          <pre>{String(result?.final_state.approved_script || "")}</pre>
-        </article>
-      </section>
+          <section className="panel-card full-span">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Rewrite</p>
+                <h3>建议修订稿</h3>
+              </div>
+            </div>
+            <article className="code-panel">
+              <div className="code-panel-body">
+                <MarkdownContent
+                  content={String(result?.final_state.approved_script || "")}
+                  emptyText="提交脚本后，这里会显示建议修订稿。"
+                />
+              </div>
+            </article>
+          </section>
 
-      <section className="panel-card full-span">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Evidence</p>
-            <h3>命中证据</h3>
-          </div>
-        </div>
-        <EvidenceList evidence={result?.final_state.retrieved_evidence || []} />
-      </section>
+          <section className="panel-card full-span">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Evidence</p>
+                <h3>命中证据</h3>
+              </div>
+            </div>
+            <EvidenceList evidence={result?.final_state.retrieved_evidence || []} />
+          </section>
 
-      <section className="panel-card full-span">
-        <div className="section-header">
-          <div>
-            <p className="section-kicker">Rule Hits</p>
-            <h3>规则命中</h3>
-          </div>
-        </div>
-        <IssueList issues={result?.final_state.rule_issues || []} />
-      </section>
+          <section className="panel-card full-span">
+            <div className="section-header">
+              <div>
+                <p className="section-kicker">Rule Hits</p>
+                <h3>规则命中</h3>
+              </div>
+            </div>
+            <IssueList issues={result?.final_state.rule_issues || []} />
+          </section>
+        </>
+      )}
     </div>
   );
 }

@@ -59,6 +59,8 @@ You MUST output each language version in EXACT sequence, separated by `---`:
 - Translate the table column HEADERS into the target language.
 - ALL generated scripts must have identical Time Codes, Scene numbers, and technical details — they are faithful translations of the primary script.
 - You MUST generate EXACTLY {language_count} versions, corresponding to: {target_languages}, IN ORDER.
+- Do NOT include acknowledgements, planning notes, strategy summaries, or any prose before the first script block.
+- Begin immediately with the first script heading or metadata block.
 """
 
 
@@ -127,4 +129,5 @@ STRICT RULES:
 - Do not invent unsupported factual claims.
 - When a disclosure issue exists, add a visible disclosure in a natural but obvious place.
 - Return the revised script only, with no explanation before or after it.
+- Do NOT add acknowledgements, strategy commentary, or operator-facing notes.
 """
