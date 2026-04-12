@@ -974,6 +974,225 @@ select {
   background: rgba(183, 63, 55, 0.16);
 }
 
+.talent-crm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.talent-todo-shell,
+.talent-kanban-shell {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.44);
+  border: 1px solid rgba(23, 33, 31, 0.08);
+  padding: 18px;
+}
+
+.talent-todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.talent-todo-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(23, 33, 31, 0.08);
+  padding: 14px 16px;
+}
+
+.talent-todo-card strong,
+.talent-kanban-card h5,
+.talent-kanban-column-head h4 {
+  margin: 0;
+  font-family: var(--font-heading), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.talent-todo-topline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.talent-todo-card p {
+  margin: 0;
+}
+
+.talent-todo-high {
+  border-left: 4px solid var(--accent);
+}
+
+.talent-todo-priority-high {
+  background: rgba(183, 63, 55, 0.12);
+  color: var(--danger);
+}
+
+.talent-todo-priority-medium {
+  background: rgba(199, 122, 18, 0.14);
+  color: var(--warn);
+}
+
+.talent-todo-priority-low {
+  background: rgba(53, 120, 79, 0.12);
+  color: var(--success);
+}
+
+.talent-kanban-scroll {
+  overflow-x: auto;
+}
+
+.talent-kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(230px, 1fr));
+  gap: 16px;
+  min-width: 1240px;
+}
+
+.talent-kanban-column {
+  min-height: 420px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(23, 33, 31, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.talent-kanban-column.is-hovering {
+  border-color: color-mix(in srgb, var(--kanban-accent) 55%, rgba(23, 33, 31, 0.08));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kanban-accent) 22%, transparent);
+}
+
+.talent-kanban-column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid rgba(23, 33, 31, 0.08);
+}
+
+.talent-kanban-column-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.talent-kanban-column-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--kanban-accent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--kanban-accent) 18%, transparent);
+}
+
+.talent-kanban-count {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 33, 31, 0.08);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.talent-kanban-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  min-height: 330px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.talent-kanban-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(23, 33, 31, 0.08);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: grab;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.talent-kanban-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(29, 33, 30, 0.08);
+}
+
+.talent-kanban-card.is-dragging {
+  opacity: 0.5;
+}
+
+.talent-kanban-card.is-updating {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.talent-kanban-card-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.talent-kanban-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.talent-kanban-platform {
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(13, 124, 114, 0.1);
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.talent-kanban-email {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.talent-kanban-card-foot {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.talent-kanban-progress-tag {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.talent-kanban-empty {
+  border: 1px dashed rgba(23, 33, 31, 0.12);
+  border-radius: 18px;
+  min-height: 160px;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.32);
+}
+
 .panel-card-disabled {
   opacity: 0.52;
   pointer-events: none;
@@ -1212,6 +1431,10 @@ select {
   .checkbox-grid,
   .workflow-stepper {
     grid-template-columns: 1fr;
+  }
+
+  .talent-kanban-grid {
+    min-width: 1120px;
   }
 
   .workflow-step {

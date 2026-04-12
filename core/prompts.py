@@ -49,13 +49,14 @@ You MUST output each language version in EXACT sequence, separated by `---`:
 
 **COLUMN DEFINITIONS**:
 - **Time Code**: Format `[MM:SS-MM:SS]`, calculated from `{video_duration}`. Divide total duration proportionally across scenes.
-- **Scene / Location**: Use standard screenplay notation: `SCENE N | INT/EXT | LOCATION NAME`. Translate INT/EXT and location names appropriately for the target language.
+- **Scene / Location**: Use standard screenplay notation INSIDE ONE CELL, for example: `SCENE N / INT/EXT / LOCATION NAME`. Translate INT/EXT and location names appropriately for the target language.
 - **Visual (Action & Camera)**: Describe shot type (ECU, CU, MS, WS, OTS), camera movement (dolly, pan, static, handheld), subject action, VFX/transitions. Incorporate the creator's style: {style_prompt}.
 - **Audio (Dialogue / VO / BGM)**: Dialogue, VO, and SFX cues must be written in the target language. Integrate trend insights: {trend_data}.
 
 **CRITICAL CONSTRAINTS**:
 - Generate enough scenes to fill the ENTIRE duration of {video_duration}.
 - The Markdown tables MUST be valid (proper pipe `|` alignment).
+- NEVER use `|` inside any table cell. Use `/`, `-`, or `<br>` inside the cell when you need sub-parts.
 - Translate the table column HEADERS into the target language.
 - ALL generated scripts must have identical Time Codes, Scene numbers, and technical details — they are faithful translations of the primary script.
 - You MUST generate EXACTLY {language_count} versions, corresponding to: {target_languages}, IN ORDER.
@@ -128,6 +129,7 @@ STRICT RULES:
 - Keep the same number of scenes and the same timing grid unless the issue explicitly requires a small wording change.
 - Do not invent unsupported factual claims.
 - When a disclosure issue exists, add a visible disclosure in a natural but obvious place.
+- Never use `|` inside a table cell. If a cell needs sub-parts, use `/`, `-`, or `<br>` instead.
 - Return the revised script only, with no explanation before or after it.
 - Do NOT add acknowledgements, strategy commentary, or operator-facing notes.
 """

@@ -171,6 +171,7 @@ def _run_generate_workflow(
         worker=run_writer,
         emit=emit,
     )
+    state["final_script"] = sanitize_script_markdown(state.get("final_script", ""))
 
     def compliance_worker(current_state: dict[str, Any]) -> dict[str, Any]:
         next_state = dict(current_state)
@@ -199,6 +200,7 @@ def _run_generate_workflow(
         worker=run_compliance_rewriter,
         emit=emit,
     )
+    state["approved_script"] = sanitize_script_markdown(state.get("approved_script", ""))
 
     return _finalize_generate_result(payload=payload, initial_state=initial_state, final_state=state)
 

@@ -4,6 +4,14 @@ import { startTransition, useEffect, useState } from "react";
 
 import { createTalent, deleteTalent, getTalents, updateTalent } from "@/lib/api";
 import type { TalentMutationRequest, TalentProfile } from "@/lib/schemas";
+import { TalentKanban } from "@/components/talents/talent-kanban";
+import { TalentTodos } from "@/components/talents/talent-todos";
+import {
+  buildTalentMutationPayload,
+  getTalentBoardColumn,
+  resolveTalentStageKey,
+  type TalentStageKey,
+} from "@/components/talents/talent-board-utils";
 
 const emptyForm: TalentMutationRequest = {
   name: "",
@@ -15,10 +23,19 @@ const emptyForm: TalentMutationRequest = {
 };
 
 function getProgressTone(progress: string) {
-  if (progress.includes("已合作") || progress.includes("完成")) {
+  if (progress.includes("已合作") || progress.includes("完成") || progress.includes("交付")) {
     return "risk-low";
   }
-  if (progress.includes("跟进") || progress.includes("推进") || progress.includes("对接")) {
+  if (
+    progress.includes("跟进") ||
+    progress.includes("推进") ||
+    progress.includes("对接") ||
+    progress.includes("沟通") ||
+    progress.includes("签约") ||
+    progress.includes("制作") ||
+    progress.includes("拍摄") ||
+    progress.includes("创作")
+  ) {
     return "risk-medium";
   }
   return "topbar-chip-muted";
@@ -42,6 +59,7 @@ export function TalentTable() {
   const [pending, setPending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [movingId, setMovingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<TalentMutationRequest>(emptyForm);
@@ -126,14 +144,52 @@ export function TalentTable() {
     });
   }
 
+  function moveTalentToStage(talent: TalentProfile, targetStage: TalentStageKey) {
+    const targetColumn = getTalentBoardColumn(targetStage);
+    const nextProgress = targetColumn.defaultProgress;
+
+    setError("");
+    setMovingId(talent.id);
+    setTalents((current) =>
+      current.map((item) =>
+        item.id === talent.id
+          ? {
+              ...item,
+              collaboration_progress: nextProgress,
+            }
+          : item,
+      ),
+    );
+    if (editingId === talent.id) {
+      setForm((current) => ({ ...current, collaboration_progress: nextProgress }));
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await updateTalent(
+          talent.id,
+          buildTalentMutationPayload(talent, { collaboration_progress: nextProgress }),
+        );
+        setTalents((current) => current.map((item) => (item.id === talent.id ? response.item : item)));
+      } catch (requestError) {
+        setError(requestError instanceof Error ? requestError.message : "更新达人阶段失败");
+        fetchTalents();
+      } finally {
+        setMovingId(null);
+      }
+    });
+  }
+
   useEffect(() => {
     fetchTalents();
   }, []);
 
   const platformCount = new Set(talents.map((talent) => talent.platform).filter(Boolean)).size;
-  const activeCount = talents.filter((talent) =>
-    /跟进|推进|对接|已合作|完成/.test(talent.collaboration_progress),
-  ).length;
+  const activeCount = talents.filter((talent) => {
+    const stage = resolveTalentStageKey(talent.collaboration_progress);
+    return stage !== "pending" && stage !== "done";
+  }).length;
+  const boardBusy = submitting || deletingId !== null || movingId !== null;
 
   return (
     <div className="content-scroll">
@@ -226,6 +282,17 @@ export function TalentTable() {
               <span>推进中</span>
               <strong>{activeCount}</strong>
             </article>
+          </div>
+
+          <div className="talent-crm-stack">
+            <TalentTodos talents={talents} />
+            <TalentKanban
+              draggingDisabled={boardBusy}
+              movingId={movingId}
+              onEdit={beginEdit}
+              onMove={moveTalentToStage}
+              talents={talents}
+            />
           </div>
         </section>
       </div>

@@ -178,6 +178,7 @@ function VideoCard({
 export function TrendsWorkspace() {
   const [filters, setFilters] = useState(defaultFilters);
   const [pendingMode, setPendingMode] = useState<LoadMode | null>(null);
+  const [lastMode, setLastMode] = useState<LoadMode>("cache");
   const [result, setResult] = useState<TrendsResponse | null>(null);
   const [error, setError] = useState("");
   const [copiedUrl, setCopiedUrl] = useState("");
@@ -212,6 +213,7 @@ export function TrendsWorkspace() {
   async function runWorkflow(mode: LoadMode) {
     setError("");
     setPendingMode(mode);
+    setLastMode(mode);
     setWorkflowSteps(createWorkflowSteps(TREND_STEP_DEFINITIONS));
 
     const controller = new AbortController();
@@ -396,7 +398,7 @@ export function TrendsWorkspace() {
             caption="热点视频、行业情报和趋势解读会按阶段依次返回。"
             cancelLabel="取消探索"
             onCancel={cancelWorkflow}
-            onRetry={() => fetchData(pendingMode || "cache")}
+            onRetry={() => fetchData(lastMode)}
             steps={workflowSteps}
             title="热点探索实时进度"
           />

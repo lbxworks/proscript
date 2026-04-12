@@ -133,7 +133,7 @@
 | `/library/rebuild` | `POST` 成功 |
 | 前端构建 | `pnpm build` 成功，路由包含 `/talents`, `/scripts/generate`, `/scripts/review`, `/trends`, `/library` |
 
-## 6. 失败项与风险项
+## ==6. 失败项与风险项==
 
 ### 6.1 失败项
 
