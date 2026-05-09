@@ -29,6 +29,7 @@ Thumbs.db
 chroma_db/
 vector_store/
 data/qdrant/
+data/knowledge_base/raw/
 
 # ========================
 # 4. Python 虚拟环境与依赖
