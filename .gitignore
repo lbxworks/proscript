@@ -62,3 +62,17 @@ node_modules/
 .next/
 .turbo/
 dist/
+
+# ========================
+# 8. 本地 Agent 与论文/文献输出
+# ========================
+.claude/
+.codex_tmp/
+REFERENCES/
+docs/drafts/
+docs/drafts*.zip
+docs/references_20260412/
+docs/references_20260412*.zip
+docs/thesis/
+docs/product_requirement_document/
+~$*.docx

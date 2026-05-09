@@ -110,7 +110,7 @@ python scripts/migrate_sqlite_to_postgres.py
 - `frontend/`：Next.js 控制台前端
 - `alembic/`：数据库迁移版本
 - `scripts/`：部署、迁移、知识库构建脚本
-- `docs/`：按主题分组的项目文档（界面、部署、知识库、测试、项目过程）
+- `docs/`：保留代码审阅和项目运行需要的轻量文档（界面、部署、知识库、测试）
 
 ## 推荐阅读
 
