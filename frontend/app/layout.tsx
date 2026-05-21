@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 
-const headingFont = Space_Grotesk({
-  subsets: ["latin"],
+const headingFont = localFont({
+  src: "./fonts/SpaceGrotesk-Variable.woff2",
   variable: "--font-heading",
+  display: "swap",
 });
 
-const bodyFont = IBM_Plex_Sans({
-  subsets: ["latin"],
+const bodyFont = localFont({
+  src: "./fonts/IBMPlexSans-Variable.woff2",
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
